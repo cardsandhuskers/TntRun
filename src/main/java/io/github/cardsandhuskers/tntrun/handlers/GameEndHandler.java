@@ -30,8 +30,15 @@ public class GameEndHandler {
         for(Team t:handler.getTeams()) {
             t.resetTempPoints();
         }
+        Location l = plugin.getConfig().getLocation("lobby");
         for(Player p:Bukkit.getOnlinePlayers()) {
-            p.teleport(plugin.getConfig().getLocation("lobby"));
+            p.teleport(l);
+        }
+        for(Player p:Bukkit.getOnlinePlayers()) {
+            if(p.isOp()) {
+                p.performCommand("startRound");
+                break;
+            }
         }
 
         //Bukkit.broadcastMessage("Game is over");
@@ -40,7 +47,7 @@ public class GameEndHandler {
 
     public void gameEndTimer() {
         Countdown timer = new Countdown((JavaPlugin)plugin,
-                10,
+                plugin.getConfig().getInt("GameEndTime"),
                 //Timer Start
                 () -> {
                     timerStatus = "Return to Lobby in";
@@ -69,11 +76,12 @@ public class GameEndHandler {
                     for(Team t:handler.getTeams()) {
                         ArrayList<TempPointsHolder> tempPointsList = new ArrayList<>();
                         for(OfflinePlayer p:t.getPlayers()) {
-                            tempPointsList.add(t.getPlayerTempPoints(p));
+                            if(t.getPlayerTempPoints(p) != null) {
+                                tempPointsList.add(t.getPlayerTempPoints(p));
+                            }
                         }
                         Collections.sort(tempPointsList, Comparator.comparing(TempPointsHolder::getPoints));
                         Collections.reverse(tempPointsList);
-
 
                         for(Player p:t.getOnlinePlayers()) {
                             p.sendMessage(ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Your Team Standings:");
@@ -118,6 +126,7 @@ public class GameEndHandler {
                         for(int i = 0; i <= max; i++) {
                             TempPointsHolder h = tempPointsList.get(i);
                             Bukkit.broadcastMessage(number + ". " + handler.getPlayerTeam(h.getPlayer()).color + h.getPlayer().getName() + ChatColor.RESET + "    Points: " +  h.getPoints());
+                            number++;
                         }
                         Bukkit.broadcastMessage(ChatColor.DARK_RED + "------------------------------");
                     }

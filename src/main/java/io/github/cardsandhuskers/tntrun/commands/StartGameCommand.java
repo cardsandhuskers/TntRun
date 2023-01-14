@@ -5,13 +5,16 @@ import io.github.cardsandhuskers.tntrun.TNTRun;
 import io.github.cardsandhuskers.tntrun.handlers.PlayerDeathHandler;
 import io.github.cardsandhuskers.tntrun.handlers.RoundStartHandler;
 import io.github.cardsandhuskers.tntrun.handlers.TimeSinceLastMovementHandler;
+import io.github.cardsandhuskers.tntrun.listeners.PlayerJoinListener;
 import io.github.cardsandhuskers.tntrun.listeners.PlayerMoveListener;
+import io.github.cardsandhuskers.tntrun.listeners.PlayerQuitListener;
 import io.github.cardsandhuskers.tntrun.objects.Countdown;
 import org.apache.commons.lang3.StringUtils;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -71,25 +74,33 @@ public class StartGameCommand implements CommandExecutor {
     public void startGame() {
         round = 0;
         Countdown timer = new Countdown((JavaPlugin)plugin,
-                10,
+                plugin.getConfig().getInt("PregameTime"),
                 //Timer Start
                 () -> {
                     timerStatus = "Game Starts in";
+                    remainingPlayers = 0;
                     for(Team t:handler.getTeams()) {
                         t.resetTempPoints();
+                        for(Player p:t.getOnlinePlayers()) {
+                            remainingPlayers++;
+                        }
                     }
-                    remainingPlayers = Bukkit.getOnlinePlayers().size();
 
                     for(Player p:Bukkit.getOnlinePlayers()) {
                         p.teleport(plugin.getConfig().getLocation("spawnPoint"));
                         Inventory inv = p.getInventory();
                         inv.clear();
+                        if(handler.getPlayerTeam(p) == null) {
+                            p.setGameMode(GameMode.SPECTATOR);
+                        }
                     }
 
 
                     timeSinceLastMovementHandler = new TimeSinceLastMovementHandler(plugin);
                     deathHandler = new PlayerDeathHandler(ppAPI);
                     roundStartHandler = new RoundStartHandler(plugin, deathHandler, timeSinceLastMovementHandler, ppAPI);
+                    getServer().getPluginManager().registerEvents(new PlayerQuitListener(deathHandler), plugin);
+                    getServer().getPluginManager().registerEvents(new PlayerJoinListener(plugin, timeSinceLastMovementHandler), plugin);
 
                 },
 
@@ -102,7 +113,7 @@ public class StartGameCommand implements CommandExecutor {
                 //Each Second
                 (t) -> {
                     TNTRun.timeVar = t.getSecondsLeft();
-                    if(t.getSecondsLeft() == 90) {
+                    if(t.getSecondsLeft() == t.getTotalSeconds() - 1) {
                         Bukkit.broadcastMessage(ChatColor.STRIKETHROUGH + "----------------------------------------");
                         Bukkit.broadcastMessage(StringUtils.center(ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "TNT Run", 30));
                         Bukkit.broadcastMessage(ChatColor.BLUE + "" + ChatColor.BOLD + "How To Play:");
@@ -111,13 +122,13 @@ public class StartGameCommand implements CommandExecutor {
                                 "\nLast person standing or anyone who survives to the end of the timer will be declared the winner.");
                         Bukkit.broadcastMessage(ChatColor.STRIKETHROUGH + "----------------------------------------");
                     }
-                    if(t.getSecondsLeft() == 80) {
+                    if(t.getSecondsLeft() == t.getTotalSeconds() - 11) {
                         Bukkit.broadcastMessage(ChatColor.STRIKETHROUGH + "----------------------------------------");
                         Bukkit.broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "How is the game Scored:");
-                        Bukkit.broadcastMessage("For winning: " + ChatColor.GOLD + (int)(100 * multiplier) + ChatColor.RESET + " points" +
-                                                "\nFor 2nd Place: " + ChatColor.GOLD + (int)(50 * multiplier) + ChatColor.RESET + " points" +
-                                                "\nFor 3rd Place: " + ChatColor.GOLD + (int)(25 * multiplier) + ChatColor.RESET + " points" +
-                                                "\nFor each player you outlive: " + ChatColor.GOLD + (int)(5 * multiplier) + ChatColor.RESET + " points");
+                        Bukkit.broadcastMessage("For winning: " + ChatColor.GOLD + (int)(plugin.getConfig().getInt("1stPlace") * multiplier) + ChatColor.RESET + " points" +
+                                                "\nFor 2nd Place: " + ChatColor.GOLD + (int)(plugin.getConfig().getInt("2ndPlace") * multiplier) + ChatColor.RESET + " points" +
+                                                "\nFor 3rd Place: " + ChatColor.GOLD + (int)(plugin.getConfig().getInt("3rdPlace") * multiplier) + ChatColor.RESET + " points" +
+                                                "\nFor each player you outlive: " + ChatColor.GOLD + (int)(plugin.getConfig().getInt("survivalPoints") * multiplier) + ChatColor.RESET + " points");
                         Bukkit.broadcastMessage(ChatColor.STRIKETHROUGH + "----------------------------------------");
                     }
                     if(t.getSecondsLeft() == 10) {

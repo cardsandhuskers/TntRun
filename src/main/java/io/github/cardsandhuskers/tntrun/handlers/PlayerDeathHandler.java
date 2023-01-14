@@ -1,5 +1,6 @@
 package io.github.cardsandhuskers.tntrun.handlers;
 
+import io.github.cardsandhuskers.teams.objects.Team;
 import io.github.cardsandhuskers.tntrun.TNTRun;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.*;
@@ -13,6 +14,7 @@ import static io.github.cardsandhuskers.tntrun.TNTRun.*;
 public class PlayerDeathHandler {
     private ArrayList<OfflinePlayer> playersList;
     private PlayerPointsAPI ppAPI;
+    private TNTRun plugin = (TNTRun) Bukkit.getPluginManager().getPlugin("TNTRun");
 
     public PlayerDeathHandler(PlayerPointsAPI ppAPI) {
         this.ppAPI = ppAPI;
@@ -23,8 +25,16 @@ public class PlayerDeathHandler {
      */
     public void initList() {
         playersList = new ArrayList<>();
-        for(Player p : Bukkit.getOnlinePlayers()) {
-            playersList.add((OfflinePlayer) p);
+        for(Team t: handler.getTeams()) {
+            for(Player p:t.getOnlinePlayers()) {
+                playersList.add((OfflinePlayer) p);
+            }
+        }
+    }
+
+    public void removePlayer(OfflinePlayer p) {
+        if(playersList != null && playersList.contains(p)) {
+            playersList.remove(p);
         }
     }
 
@@ -62,27 +72,23 @@ public class PlayerDeathHandler {
     }
     public void updatePoints(Player p) {
         if(handler.getPlayerTeam(p) != null && playersList.size() > 0) {
+            int points = plugin.getConfig().getInt("survivalPoints");
             for (OfflinePlayer player : playersList) {
+                if(player.getPlayer() == null || player.getPlayer().equals(p)) continue;
                 if (handler.getPlayerTeam(player.getPlayer()) != null) {
-
-                    player.getPlayer().sendMessage(handler.getPlayerTeam(p).color + p.getName() + ChatColor.RESET + " has fallen to their death! [" + ChatColor.GOLD + "+" + ChatColor.RED + 5 * multiplier + ChatColor.RESET + "] points!");
+                    player.getPlayer().sendMessage(handler.getPlayerTeam(p).color + p.getName() + ChatColor.RESET + " has fallen to their death! [" + ChatColor.GOLD + "+" + ChatColor.RED + points * multiplier + ChatColor.RESET + "] points!");
                     player.getPlayer().playSound(player.getPlayer().getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1,1);
 
                     Player p2 = player.getPlayer();
-                    ppAPI.give(player.getUniqueId(), (int) (5 * TNTRun.multiplier));
-                    handler.getPlayerTeam(p2).addTempPoints(p2, (int) (5 * multiplier));
+                    ppAPI.give(player.getUniqueId(), (int) (points * TNTRun.multiplier));
+                    handler.getPlayerTeam(p2).addTempPoints(p2, (int) (points * multiplier));
 
                 }
             }
             for(Player player:Bukkit.getOnlinePlayers()) {
-                for(OfflinePlayer player2:playersList) {
-                    if (player2.getPlayer() != null) {
-                        if(player2.getPlayer().equals(player)) {
-                            player.sendMessage(handler.getPlayerTeam(p).color + p.getName() + ChatColor.RESET + " has fallen to their death!");
-                            //player.getPlayer().playSound(player.getPlayer().getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1,1);
-                            break;
-                        }
-                    }
+                if(!playersList.contains((OfflinePlayer) player) && !player.equals(p)) {
+                    player.sendMessage(handler.getPlayerTeam(p).color + p.getName() + ChatColor.RESET + " has fallen to their death!");
+                    //player.getPlayer().playSound(player.getPlayer().getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1,1);
                 }
             }
         }
@@ -90,25 +96,28 @@ public class PlayerDeathHandler {
         //when 3rd place dies, give them 25 bonus points
         if(playersList.size() == 2) {
             if(p != null && handler.getPlayerTeam(p) != null) {
-                ppAPI.give(p.getUniqueId(), (int) (25 * TNTRun.multiplier));
-                handler.getPlayerTeam(p).addTempPoints(p, (int) (25 * multiplier));
-                p.sendMessage("You Died! You came in " + ChatColor.RED + (playersList.size() + 1) + "rd" + ChatColor.RESET + " Place [" + ChatColor.GOLD + "+" + ChatColor.RED + 25 * multiplier + ChatColor.RESET + "] points!");
+                int points = plugin.getConfig().getInt("3rdPlace");
+                ppAPI.give(p.getUniqueId(), (int) (points * multiplier));
+                handler.getPlayerTeam(p).addTempPoints(p, (int) (points * multiplier));
+                p.sendMessage("You Died! You came in " + ChatColor.RED + (playersList.size() + 1) + "rd" + ChatColor.RESET + " Place [" + ChatColor.GOLD + "+" + ChatColor.RED + points * multiplier + ChatColor.RESET + "] points!");
             }
         }
 
         if(playersList.size() == 1) {
+            int firstPoints = plugin.getConfig().getInt("1stPlace");
+            int secondPoints = plugin.getConfig().getInt("2ndPlace");
             Player p2 = playersList.get(0).getPlayer();
             //give 100 points to winner
             if(p2 != null && handler.getPlayerTeam(p2) != null) {
-                ppAPI.give(p2.getUniqueId(), (int) (100 * TNTRun.multiplier));
-                handler.getPlayerTeam(p2).addTempPoints(p2, (int) (100 * multiplier));
-                p2.sendMessage("You Won! [" + ChatColor.GOLD + "+" + ChatColor.RED + 100 * multiplier + ChatColor.RESET + "] points!");
+                ppAPI.give(p2.getUniqueId(), (int) (firstPoints * TNTRun.multiplier));
+                handler.getPlayerTeam(p2).addTempPoints(p2, (int) (firstPoints * multiplier));
+                p2.sendMessage("You Won! [" + ChatColor.GOLD + "+" + ChatColor.RED + firstPoints * multiplier + ChatColor.RESET + "] points!");
             }
             //player that died is 2nd place, give them 50 bonus points
             if(p != null && handler.getPlayerTeam(p) != null) {
-                ppAPI.give(p.getUniqueId(), (int) (50 * TNTRun.multiplier));
-                handler.getPlayerTeam(p).addTempPoints(p, (int) (50 * multiplier));
-                p.sendMessage("You Died! You came in " + ChatColor.RED + (playersList.size() + 1) + "nd" + ChatColor.RESET + " Place [" + ChatColor.GOLD + "+" + ChatColor.RED + 50 * multiplier + ChatColor.RESET + "] points!");
+                ppAPI.give(p.getUniqueId(), (int) (secondPoints * TNTRun.multiplier));
+                handler.getPlayerTeam(p).addTempPoints(p, (int) (secondPoints * multiplier));
+                p.sendMessage("You Died! You came in " + ChatColor.RED + (playersList.size() + 1) + "nd" + ChatColor.RESET + " Place [" + ChatColor.GOLD + "+" + ChatColor.RED + secondPoints * multiplier + ChatColor.RESET + "] points!");
             }
         }
     }

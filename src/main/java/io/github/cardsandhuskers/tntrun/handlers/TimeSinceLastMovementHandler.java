@@ -41,7 +41,7 @@ public class TimeSinceLastMovementHandler implements Runnable {
     }
 
     /**
-     * Actions to be completed when the operation is active
+     * Actions to be completed repeatedly when the operation is active
      */
     @Override
     public void run() {
@@ -56,27 +56,43 @@ public class TimeSinceLastMovementHandler implements Runnable {
         }
     }
 
-
+    /**
+     * resets the ticks for a player
+     * @param p
+     */
     public void resetTicks(Player p) {
         OfflinePlayer player = p;
         playerList.put(player, 0);
     }
 
 
+    /**
+     * Stop the repeating task
+     */
     public void cancelOperation() {
         if (assignedTaskId != null) Bukkit.getScheduler().cancelTask(assignedTaskId);
     }
 
 
     /**
-     * Schedules this instance to "run" every second
+     * Schedules this instance to "run" every tick
      */
     public void startOperation() {
         // Initialize our assigned task's id, for later use so we can cancel
         this.assignedTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this, 0L, 1L);
     }
 
-    public void deleteBlock(Player p, int ticks) {
+    public void addPlayer(OfflinePlayer p) {
+        playerList.put(p, 0);
+    }
+
+    /**
+     * Handles block deletion for a player that is standing still
+     * IF ARENA IS IN NEGATIVE QUADRANTS, THIS WILL NOT WORK CORRECTLY (Arena must be in quadrant 1)
+     * @param p
+     * @param ticks
+     */
+    private void deleteBlock(Player p, int ticks) {
         Location initialLoc = p.getLocation();
         initialLoc.setY(initialLoc.getY() - 1);
         if(initialLoc.getY() % 1 == 0 && (initialLoc.getBlock().getType() == Material.AIR || ticks >= 20) && p.getGameMode() == GameMode.ADVENTURE) {
@@ -126,7 +142,7 @@ public class TimeSinceLastMovementHandler implements Runnable {
 
                 boolean destroyed = false;
                 //destroy 1 nearby block player could be standing on
-
+                //Bukkit.broadcastMessage("X: " + resultX + "  Z: " + resultZ);
                 if(!(initialLoc.getBlock().getType() == Material.AIR)) {
                     //System.out.println("BASE BLOCK CALLED");
                     Location location = new Location(initialLoc.getWorld(), initialLoc.getX(), initialLoc.getY(), initialLoc.getZ());
@@ -188,7 +204,13 @@ public class TimeSinceLastMovementHandler implements Runnable {
             }, 5L);
         }
     }
-    public boolean updateLocation(Location l) {
+
+    /**
+     * Sets the 2 blocks underneath the specified location to air
+     * @param l
+     * @return
+     */
+    private boolean updateLocation(Location l) {
         if(l.getBlock().getType() == Material.SAND || l.getBlock().getType() == Material.GRAVEL) {
             l.getBlock().setType(Material.AIR);
             l.setY(l.getY() - 1);

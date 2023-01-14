@@ -1,5 +1,17 @@
+PregameTime: 50
+PreRoundTime: 10
+RoundTime: 300
+PostRoundTime: 5
+GameEndTime: 20
+
+#points for outlasting another player
+survivalPoints: 20
+
+#top 3 points
+1stPlace: 75
+2ndPlace: 50
+3rdPlace: 25
+
 pos1:
 pos2:
 spawnPoint:
-sandLocations:
-gravelLocations:

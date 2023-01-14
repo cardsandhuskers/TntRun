@@ -1,8 +1,13 @@
 package io.github.cardsandhuskers.tntrun.objects;
 
+import io.github.cardsandhuskers.teams.objects.Team;
 import io.github.cardsandhuskers.tntrun.TNTRun;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
 
 import static io.github.cardsandhuskers.tntrun.TNTRun.*;
 import static io.github.cardsandhuskers.tntrun.handlers.RoundStartHandler.round;
@@ -52,6 +57,7 @@ public class Placeholder extends PlaceholderExpansion {
         if(s.equalsIgnoreCase("playersLeft")) {
             return remainingPlayers + "";
         }
+
         return null;
     }
 }

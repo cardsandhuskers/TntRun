@@ -80,7 +80,7 @@ public class PlayerMoveListener implements Listener {
 
                                 Location loc = new Location(initialLoc.getWorld(), initialLoc.getX(), initialLoc.getY(), initialLoc.getZ());
                                 updateLocation(loc);
-                            }, 3L);
+                            }, 4L);
                         } else if (initialLoc.getBlock().getType() == Material.AIR){
                             //Bukkit.broadcastMessage("AIR");
                             //Bukkit.broadcastMessage("X: " + initialLoc.getBlock().getX() + "Z: " + initialLoc.getBlock().getZ());
@@ -105,7 +105,7 @@ public class PlayerMoveListener implements Listener {
                                         updateLocation(loc);
                                     }
                                 }
-                            }, 3L);
+                            }, 4L);
                         }
                     }
                 }

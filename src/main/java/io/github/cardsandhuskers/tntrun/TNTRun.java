@@ -58,17 +58,6 @@ public final class TNTRun extends JavaPlugin {
         getConfig().options().copyDefaults();
         saveDefaultConfig();
 
-
-
-
-
-
-
-
-
-
-
-
         getCommand("setRunPos1").setExecutor(new SetPos1Command(this));
         getCommand("setRunPos2").setExecutor(new SetPos2Command(this));
         getCommand("saveRunArena").setExecutor(new SaveArenaCommand(this));

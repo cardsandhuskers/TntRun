@@ -12,7 +12,10 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,13 +65,19 @@ public class RoundStartHandler {
         }
     }
 
-    public void pregameTimer() {
+    private void pregameTimer() {
         Countdown timer = new Countdown((JavaPlugin)plugin,
-                10,
+                plugin.getConfig().getInt("PreRoundTime"),
                 //Timer Start
                 () -> {
                     teleportPlayers();
                     timerStatus = "Round Starts in";
+                    remainingPlayers = 0;
+                    for(Player p:Bukkit.getOnlinePlayers()) {
+                        if(handler.getPlayerTeam(p) != null) {
+                            remainingPlayers ++;
+                        }
+                    }
 
                 },
 
@@ -89,6 +98,9 @@ public class RoundStartHandler {
                     if(t.getSecondsLeft() < 5) {
                         for(Player p:Bukkit.getOnlinePlayers()) {
                             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1);
+                            p.setHealth(20);
+                            p.setSaturation(20);
+                            p.setFoodLevel(20);
                         }
                     }
                 }
@@ -98,12 +110,28 @@ public class RoundStartHandler {
         timer.scheduleTimer();
     }
 
-    public void gameTimer() {
+    private void gameTimer() {
         gameTimer = new Countdown((JavaPlugin)plugin,
-                15,
+                plugin.getConfig().getInt("RoundTime"),
                 //Timer Start
                 () -> {
                     timerStatus = "Round Ends in";
+                    for(Team t: handler.getTeams()) {
+                        for(Player p:t.getOnlinePlayers()) {
+                            if(p.getGameMode() != GameMode.ADVENTURE) {
+                                p.teleport(plugin.getConfig().getLocation("spawnPoint"));
+                            }
+                            p.setGameMode(GameMode.ADVENTURE);
+                            p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 18000, 1));
+                        }
+                    }
+                    for(Player p:Bukkit.getOnlinePlayers()) {
+                        if(handler.getPlayerTeam(p) == null) {
+                            p.setGameMode(GameMode.SPECTATOR);
+                        }
+                        Inventory inv = p.getInventory();
+                        inv.clear();
+                    }
 
                 },
 
@@ -147,71 +175,38 @@ public class RoundStartHandler {
             //int tempX = -1000;
 
             //for each part of the arenaConfig
+            int counter = 1;
             for (String s : arenaFileConfig.getConfigurationSection("blocks").getKeys(false)) {
-                ConfigurationSection t = arenaFileConfig.getConfigurationSection("blocks." + s);
+                Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, () -> {
 
-                //build location from data and get its block
-                Location loc = new Location(Bukkit.getWorld(arenaFileConfig.get("world").toString()),
-                        t.getDouble("x"), t.getDouble("y"), t.getDouble("z"));
-                Block b = loc.getBlock();
+                    ConfigurationSection t = arenaFileConfig.getConfigurationSection("blocks." + s);
 
-                //blockMap.put(b, t.get("Block").toString());
-                switch(t.get("Block").toString()) {
-                    case "TNT":
-                        b.setType(Material.TNT);
-                        break;
-                    case "SAND":
-                        b.setType(Material.SAND);
-                        break;
-                    case "GRAVEL":
-                        b.setType(Material.GRAVEL);
-                        break;
-                }
+                    //build location from data and get its block
+                    Location loc = new Location(Bukkit.getWorld(arenaFileConfig.get("world").toString()),
+                            t.getDouble("x"), t.getDouble("y"), t.getDouble("z"));
+                    Block b = loc.getBlock();
 
-
-
-                //if(b.getX() != tempX) {
-                //    numX++;
-                //    tempX = b.getX();
-                //}
-
-            }
-
-            int counter = 0;
-
-            /*
-            while(counter < numX) {
-                int finalTempX = tempX;
-                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
-
-                    for(Block b : blockMap.keySet()) {
-                        if(b.getX() == finalTempX) {
-                            System.out.println(b);
-                            System.out.println(System.currentTimeMillis());
-                            String mat = blockMap.get(b);
-                            switch(mat) {
-                                case "TNT":
-                                    b.setType(Material.TNT);
-                                    break;
-                                case "SAND":
-                                    b.setType(Material.SAND);
-                                    break;
-                                case "GRAVEL":
-                                    b.setType(Material.GRAVEL);
-                                    break;
-                            }
-                        }
+                    //blockMap.put(b, t.get("Block").toString());
+                    switch(t.get("Block").toString()) {
+                        case "TNT":
+                            b.setType(Material.TNT);
+                            break;
+                        case "SAND":
+                            b.setType(Material.SAND);
+                            break;
+                        case "GRAVEL":
+                            b.setType(Material.GRAVEL);
+                            break;
                     }
-                }, 20L);
-
-                tempX--;
+                }, 1L * (counter/200) + 1);
                 counter++;
             }
-
-             */
         }
     }
 
+    /**
+     * Initializes the reset process to end the round and start the next one
+     */
     public void reset() {
         gameTimer.cancelTimer();
         timeSinceLastMovementHandler.cancelOperation();
@@ -265,7 +260,7 @@ public class RoundStartHandler {
 
 
         Countdown timer = new Countdown((JavaPlugin)plugin,
-                10,
+                plugin.getConfig().getInt("PostRoundTime"),
                 //Timer Start
                 () -> {
                     if(round == 3) {
@@ -273,6 +268,11 @@ public class RoundStartHandler {
 
                     } else {
                         timerStatus = "Preparing";
+                    }
+                    try {
+                        rebuildArena();
+                    } catch (IOException e) {
+                        Bukkit.broadcastMessage(ChatColor.RED + "CANNOT BUILD ARENA: DATA FILE NOT FOUND");
                     }
 
                     gameRunning = false;
@@ -287,25 +287,21 @@ public class RoundStartHandler {
                 //Each Second
                 (t) -> {
                     TNTRun.timeVar = t.getSecondsLeft();
-                    if(t.getSecondsLeft() == 6) {
-                        try {
-                            rebuildArena();
-                        } catch (IOException e) {
-                            Bukkit.broadcastMessage(ChatColor.RED + "CANNOT BUILD ARENA: DATA FILE NOT FOUND");
-                        }
-                    }
                 }
         );
         timer.scheduleTimer();
 
     }
 
-    public void teleportPlayers() {
+    private void teleportPlayers() {
         for (Team t: handler.getTeams()) {
             for(Player p :t.getOnlinePlayers()) {
                 p.teleport(plugin.getConfig().getLocation("spawnPoint"));
                 p.setGameMode(GameMode.ADVENTURE);
+                Inventory inv = p.getInventory();
+                inv.clear();
                 numPlayers++;
+                p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 18000, 1));
             }
         }
     }

@@ -73,7 +73,7 @@ public class SaveArenaCommand implements CommandExecutor {
                 }
             }
             for(Location l: blockMap.keySet()) {
-                System.out.println(l);
+                //System.out.println(l);
             }
 
 //SAVE DATA
@@ -104,7 +104,7 @@ public class SaveArenaCommand implements CommandExecutor {
                 index++;
             }
 
-            System.out.println(index);
+            //System.out.println(index);
             try {
                 arenaFileConfig.save(arenaFile);
             } catch (IOException e) {
