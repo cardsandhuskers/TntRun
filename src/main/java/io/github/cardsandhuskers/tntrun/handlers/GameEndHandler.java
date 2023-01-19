@@ -1,7 +1,6 @@
 package io.github.cardsandhuskers.tntrun.handlers;
 
 import io.github.cardsandhuskers.teams.objects.Team;
-import io.github.cardsandhuskers.teams.objects.TempPointsHolder;
 import io.github.cardsandhuskers.tntrun.TNTRun;
 import io.github.cardsandhuskers.tntrun.objects.Countdown;
 import org.bukkit.Bukkit;
@@ -27,9 +26,6 @@ public class GameEndHandler {
     }
     public void endGame() {
         HandlerList.unregisterAll(plugin);
-        for(Team t:handler.getTeams()) {
-            t.resetTempPoints();
-        }
         Location l = plugin.getConfig().getLocation("lobby");
         for(Player p:Bukkit.getOnlinePlayers()) {
             p.teleport(l);
