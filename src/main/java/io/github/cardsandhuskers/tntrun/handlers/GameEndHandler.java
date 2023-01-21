@@ -27,9 +27,6 @@ public class GameEndHandler {
     }
     public void endGame() {
         HandlerList.unregisterAll(plugin);
-        for(Team t:handler.getTeams()) {
-            t.resetTempPoints();
-        }
         Location l = plugin.getConfig().getLocation("lobby");
         for(Player p:Bukkit.getOnlinePlayers()) {
             p.teleport(l);
