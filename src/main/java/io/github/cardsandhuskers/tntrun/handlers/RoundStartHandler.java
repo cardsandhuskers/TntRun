@@ -2,10 +2,8 @@ package io.github.cardsandhuskers.tntrun.handlers;
 
 import io.github.cardsandhuskers.teams.objects.Team;
 import io.github.cardsandhuskers.tntrun.TNTRun;
-import io.github.cardsandhuskers.tntrun.listeners.PlayerMoveListener;
 import io.github.cardsandhuskers.tntrun.objects.Countdown;
 import org.apache.commons.lang3.StringUtils;
-import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
@@ -32,14 +30,12 @@ public class RoundStartHandler {
     private Countdown gameTimer;
     private PlayerDeathHandler deathHandler;
     private TimeSinceLastMovementHandler timeSinceLastMovementHandler;
-    private PlayerPointsAPI ppAPI;
 
     private int numPlayers = 0;
-    public RoundStartHandler(TNTRun plugin, PlayerDeathHandler deathHandler, TimeSinceLastMovementHandler timeSinceLastMovementHandler, PlayerPointsAPI ppAPI) {
+    public RoundStartHandler(TNTRun plugin, PlayerDeathHandler deathHandler, TimeSinceLastMovementHandler timeSinceLastMovementHandler) {
         this.timeSinceLastMovementHandler = timeSinceLastMovementHandler;
         this.plugin = plugin;
         this.deathHandler = deathHandler;
-        this.ppAPI = ppAPI;
     }
 
     /**
@@ -220,8 +216,7 @@ public class RoundStartHandler {
             }
             for(OfflinePlayer p:players) {
                 if(p.getPlayer() != null & handler.getPlayerTeam(p.getPlayer()) != null) {
-                    ppAPI.give(p.getUniqueId(), (int) ((points/players.size()) * TNTRun.multiplier));
-                    handler.getPlayerTeam(p.getPlayer()).addTempPoints(p.getPlayer(), (int) ((points/players.size()) * multiplier));
+                    handler.getPlayerTeam(p.getPlayer()).addTempPoints(p.getPlayer(), (points/players.size()) * multiplier);
                     p.getPlayer().sendMessage("You Won! [" + ChatColor.GOLD + "+" + ChatColor.RED + (points/players.size()) * multiplier + ChatColor.RESET + "] points!");
                 }
             }

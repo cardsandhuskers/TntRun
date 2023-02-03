@@ -10,7 +10,6 @@ import io.github.cardsandhuskers.tntrun.listeners.PlayerMoveListener;
 import io.github.cardsandhuskers.tntrun.listeners.PlayerQuitListener;
 import io.github.cardsandhuskers.tntrun.objects.Countdown;
 import org.apache.commons.lang3.StringUtils;
-import org.black_ixx.playerpoints.PlayerPointsAPI;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -34,12 +33,10 @@ public class StartGameCommand implements CommandExecutor {
     private final TNTRun plugin;
     private RoundStartHandler roundStartHandler;
     private PlayerDeathHandler deathHandler;
-    private PlayerPointsAPI ppAPI;
     private TimeSinceLastMovementHandler timeSinceLastMovementHandler;
 
-    public StartGameCommand(TNTRun plugin, PlayerPointsAPI ppAPI) {
+    public StartGameCommand(TNTRun plugin) {
         this.plugin = plugin;
-        this.ppAPI = ppAPI;
     }
 
     @Override
@@ -97,8 +94,8 @@ public class StartGameCommand implements CommandExecutor {
 
 
                     timeSinceLastMovementHandler = new TimeSinceLastMovementHandler(plugin);
-                    deathHandler = new PlayerDeathHandler(ppAPI);
-                    roundStartHandler = new RoundStartHandler(plugin, deathHandler, timeSinceLastMovementHandler, ppAPI);
+                    deathHandler = new PlayerDeathHandler();
+                    roundStartHandler = new RoundStartHandler(plugin, deathHandler, timeSinceLastMovementHandler);
                     getServer().getPluginManager().registerEvents(new PlayerQuitListener(deathHandler), plugin);
                     getServer().getPluginManager().registerEvents(new PlayerJoinListener(plugin, timeSinceLastMovementHandler), plugin);
 
