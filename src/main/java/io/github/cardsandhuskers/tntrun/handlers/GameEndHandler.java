@@ -1,6 +1,7 @@
 package io.github.cardsandhuskers.tntrun.handlers;
 
 import io.github.cardsandhuskers.teams.objects.Team;
+import io.github.cardsandhuskers.teams.objects.TempPointsHolder;
 import io.github.cardsandhuskers.tntrun.TNTRun;
 import io.github.cardsandhuskers.tntrun.objects.Countdown;
 import org.bukkit.Bukkit;
@@ -30,12 +31,7 @@ public class GameEndHandler {
         for(Player p:Bukkit.getOnlinePlayers()) {
             p.teleport(l);
         }
-        for(Player p:Bukkit.getOnlinePlayers()) {
-            if(p.isOp()) {
-                p.performCommand("startRound");
-                break;
-            }
-        }
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "startRound");
 
         //Bukkit.broadcastMessage("Game is over");
     }
