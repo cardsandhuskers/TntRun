@@ -128,8 +128,12 @@ public class StartGameCommand implements CommandExecutor {
                                                 "\nFor each player you outlive: " + ChatColor.GOLD + (int)(plugin.getConfig().getInt("survivalPoints") * multiplier) + ChatColor.RESET + " points");
                         Bukkit.broadcastMessage(ChatColor.STRIKETHROUGH + "----------------------------------------");
                     }
-                    if(t.getSecondsLeft() == t.getTotalSeconds() - 5) {
-                        roundStartHandler.rebuildArena();
+                    if(t.getSecondsLeft() == 10) {
+                        try {
+                            roundStartHandler.rebuildArena();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
 
                 }

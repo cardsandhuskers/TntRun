@@ -4,6 +4,7 @@ import io.github.cardsandhuskers.teams.objects.Team;
 import io.github.cardsandhuskers.tntrun.TNTRun;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
@@ -56,6 +57,26 @@ public class Placeholder extends PlaceholderExpansion {
         }
         if(s.equalsIgnoreCase("playersLeft")) {
             return remainingPlayers + "";
+        }
+        String[] values = s.split("_");
+        try {
+            if(values[0].equalsIgnoreCase("wins")) {
+                ArrayList<StatCalculator.PlayerStatsHolder> statsHolders = plugin.statCalculator.getPlayerStatsHolders();
+                int index = Integer.parseInt(values[1]);
+                if(index > statsHolders.size()) return "";
+                StatCalculator.PlayerStatsHolder holder = statsHolders.get(Integer.parseInt(values[1]) - 1);
+                String color = "";
+                if (handler.getPlayerTeam(Bukkit.getPlayer(holder.name)) != null)
+                    color = handler.getPlayerTeam(Bukkit.getPlayer(holder.name)).color;
+                return color + holder.name + ChatColor.RESET + ": " + holder.wins;
+            }
+
+
+        } catch (Exception e) {
+            StackTraceElement[] trace = e.getStackTrace();
+            String str = "";
+            for(StackTraceElement element:trace) str += element.toString() + "\n";
+            plugin.getLogger().warning("Error with Placeholder!\n" + str);
         }
 
         return null;

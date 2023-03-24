@@ -31,7 +31,20 @@ public class GameEndHandler {
         for(Player p:Bukkit.getOnlinePlayers()) {
             p.teleport(l);
         }
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "startRound");
+        for(Player p:Bukkit.getOnlinePlayers()) {
+            if(p.isOp()) {
+                p.performCommand("startRound");
+                break;
+            }
+        }
+        try {
+            plugin.statCalculator.calculateStats();
+        } catch (Exception e) {
+            StackTraceElement[] trace = e.getStackTrace();
+            String str = "";
+            for(StackTraceElement element:trace) str += element.toString() + "\n";
+            plugin.getLogger().severe("ERROR Calculating Stats!\n" + str);
+        }
 
         //Bukkit.broadcastMessage("Game is over");
     }
