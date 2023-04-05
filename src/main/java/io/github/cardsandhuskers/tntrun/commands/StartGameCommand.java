@@ -30,13 +30,28 @@ import static org.bukkit.Bukkit.getServer;
 
 public class StartGameCommand implements CommandExecutor {
 
-    private final TNTRun plugin;
+    private TNTRun plugin;
     private RoundStartHandler roundStartHandler;
     private PlayerDeathHandler deathHandler;
     private TimeSinceLastMovementHandler timeSinceLastMovementHandler;
+    private final String GAME_DESCRIPTION, POINTS_DESCRIPTION;
 
     public StartGameCommand(TNTRun plugin) {
         this.plugin = plugin;
+        GAME_DESCRIPTION = ChatColor.STRIKETHROUGH + "----------------------------------------" +
+                "\n" + StringUtils.center(ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "TNT Run", 30) +
+                ChatColor.BLUE + "" + ChatColor.BOLD + "\nHow To Play:" +
+                ChatColor.RESET + "\nAs you run, the blocks you stand on will fall." +
+                "\nThere are 4 levels, fall through all 4 and you lose." +
+                "\nLast person standing or anyone who survives to the end of the timer will be declared the winner." +
+                ChatColor.STRIKETHROUGH + "\n----------------------------------------";
+        POINTS_DESCRIPTION = "----------------------------------------" +
+                ChatColor.GOLD + "" + ChatColor.BOLD + "\nHow is the game Scored:" +
+                ChatColor.RESET + "\nFor winning: " + ChatColor.GOLD + (int)(plugin.getConfig().getInt("1stPlace") * multiplier) + ChatColor.RESET + " points" +
+                "\nFor 2nd Place: " + ChatColor.GOLD + (int)(plugin.getConfig().getInt("2ndPlace") * multiplier) + ChatColor.RESET + " points" +
+                "\nFor 3rd Place: " + ChatColor.GOLD + (int)(plugin.getConfig().getInt("3rdPlace") * multiplier) + ChatColor.RESET + " points" +
+                "\nFor each player you outlive: " + ChatColor.GOLD + (int)(plugin.getConfig().getInt("survivalPoints") * multiplier) + ChatColor.RESET + " points" +
+                ChatColor.STRIKETHROUGH + "\n----------------------------------------";
     }
 
     @Override
@@ -59,46 +74,75 @@ public class StartGameCommand implements CommandExecutor {
                     startGame();
                 }
 
-
-
             } else {
                 p.sendMessage("Spawn Point not Set");
             }
+        } else if(sender instanceof Player p) {}
+        else {
+            if (plugin.getConfig().getLocation("spawnPoint") != null) {
+                if(args.length > 0) {
+                    if (args[0] != null) {
+                        //run if at least 1 arg and it's not null
+                        try {
+                            TNTRun.multiplier = Double.parseDouble(args[0]);
+                            startGame();
+
+                        } catch (Exception e) {
+                            plugin.getLogger().warning(ChatColor.RED + "ERROR: Argument must be an integer");
+                        }
+                    }
+                } else {
+                    //run if no arguments
+                    startGame();
+                }
+
+
+
+            } else {
+                plugin.getLogger().warning("Spawn Point not Set");
+            }
+
+
+
         }
         return false;
     }
 
     public void startGame() {
         round = 0;
+
+        for(org.bukkit.scoreboard.Team t:Bukkit.getScoreboardManager().getMainScoreboard().getTeams()) {
+            t.setOption(org.bukkit.scoreboard.Team.Option.COLLISION_RULE, org.bukkit.scoreboard.Team.OptionStatus.NEVER);
+        }
+        timerStatus = "Game Starts in";
+        remainingPlayers = 0;
+        for(Team t:handler.getTeams()) {
+            t.resetTempPoints();
+            for(Player p:t.getOnlinePlayers()) {
+                remainingPlayers++;
+            }
+        }
+
+        for(Player p:Bukkit.getOnlinePlayers()) {
+            p.teleport(plugin.getConfig().getLocation("spawnPoint"));
+            Inventory inv = p.getInventory();
+            inv.clear();
+            if(handler.getPlayerTeam(p) == null) {
+                p.setGameMode(GameMode.SPECTATOR);
+            }
+        }
+
+
+        timeSinceLastMovementHandler = new TimeSinceLastMovementHandler(plugin);
+        deathHandler = new PlayerDeathHandler();
+        roundStartHandler = new RoundStartHandler(plugin, deathHandler, timeSinceLastMovementHandler);
+        getServer().getPluginManager().registerEvents(new PlayerQuitListener(deathHandler), plugin);
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(plugin, timeSinceLastMovementHandler), plugin);
+
         Countdown timer = new Countdown((JavaPlugin)plugin,
                 plugin.getConfig().getInt("PregameTime"),
                 //Timer Start
                 () -> {
-                    timerStatus = "Game Starts in";
-                    remainingPlayers = 0;
-                    for(Team t:handler.getTeams()) {
-                        t.resetTempPoints();
-                        for(Player p:t.getOnlinePlayers()) {
-                            remainingPlayers++;
-                        }
-                    }
-
-                    for(Player p:Bukkit.getOnlinePlayers()) {
-                        p.teleport(plugin.getConfig().getLocation("spawnPoint"));
-                        Inventory inv = p.getInventory();
-                        inv.clear();
-                        if(handler.getPlayerTeam(p) == null) {
-                            p.setGameMode(GameMode.SPECTATOR);
-                        }
-                    }
-
-
-                    timeSinceLastMovementHandler = new TimeSinceLastMovementHandler(plugin);
-                    deathHandler = new PlayerDeathHandler();
-                    roundStartHandler = new RoundStartHandler(plugin, deathHandler, timeSinceLastMovementHandler);
-                    getServer().getPluginManager().registerEvents(new PlayerQuitListener(deathHandler), plugin);
-                    getServer().getPluginManager().registerEvents(new PlayerJoinListener(plugin, timeSinceLastMovementHandler), plugin);
-
                 },
 
                 //Timer End
@@ -111,29 +155,13 @@ public class StartGameCommand implements CommandExecutor {
                 (t) -> {
                     TNTRun.timeVar = t.getSecondsLeft();
                     if(t.getSecondsLeft() == t.getTotalSeconds() - 1) {
-                        Bukkit.broadcastMessage(ChatColor.STRIKETHROUGH + "----------------------------------------");
-                        Bukkit.broadcastMessage(StringUtils.center(ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "TNT Run", 30));
-                        Bukkit.broadcastMessage(ChatColor.BLUE + "" + ChatColor.BOLD + "How To Play:");
-                        Bukkit.broadcastMessage("As you run, the blocks you stand on will fall." +
-                                "\nThere are 4 levels, fall through all 4 and you lose." +
-                                "\nLast person standing or anyone who survives to the end of the timer will be declared the winner.");
-                        Bukkit.broadcastMessage(ChatColor.STRIKETHROUGH + "----------------------------------------");
+                        Bukkit.broadcastMessage(GAME_DESCRIPTION);
                     }
                     if(t.getSecondsLeft() == t.getTotalSeconds() - 11) {
-                        Bukkit.broadcastMessage(ChatColor.STRIKETHROUGH + "----------------------------------------");
-                        Bukkit.broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "How is the game Scored:");
-                        Bukkit.broadcastMessage("For winning: " + ChatColor.GOLD + (int)(plugin.getConfig().getInt("1stPlace") * multiplier) + ChatColor.RESET + " points" +
-                                                "\nFor 2nd Place: " + ChatColor.GOLD + (int)(plugin.getConfig().getInt("2ndPlace") * multiplier) + ChatColor.RESET + " points" +
-                                                "\nFor 3rd Place: " + ChatColor.GOLD + (int)(plugin.getConfig().getInt("3rdPlace") * multiplier) + ChatColor.RESET + " points" +
-                                                "\nFor each player you outlive: " + ChatColor.GOLD + (int)(plugin.getConfig().getInt("survivalPoints") * multiplier) + ChatColor.RESET + " points");
-                        Bukkit.broadcastMessage(ChatColor.STRIKETHROUGH + "----------------------------------------");
+                        Bukkit.broadcastMessage(POINTS_DESCRIPTION);
                     }
                     if(t.getSecondsLeft() == 10) {
-                        try {
-                            roundStartHandler.rebuildArena();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
+                        roundStartHandler.rebuildArena();
                     }
 
                 }

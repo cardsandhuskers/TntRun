@@ -76,7 +76,7 @@ public class Placeholder extends PlaceholderExpansion {
             StackTraceElement[] trace = e.getStackTrace();
             String str = "";
             for(StackTraceElement element:trace) str += element.toString() + "\n";
-            plugin.getLogger().warning("Error with Placeholder!\n" + str);
+            plugin.getLogger().warning("Error with Placeholder!\n");
         }
 
         return null;

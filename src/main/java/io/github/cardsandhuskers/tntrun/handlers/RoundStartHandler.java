@@ -1,5 +1,15 @@
 package io.github.cardsandhuskers.tntrun.handlers;
 
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.bukkit.BukkitWorld;
+import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
+import com.sk89q.worldedit.function.operation.Operation;
+import com.sk89q.worldedit.function.operation.Operations;
+import com.sk89q.worldedit.session.ClipboardHolder;
 import io.github.cardsandhuskers.teams.objects.Team;
 import io.github.cardsandhuskers.tntrun.TNTRun;
 import io.github.cardsandhuskers.tntrun.objects.Countdown;
@@ -16,6 +26,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -48,11 +59,7 @@ public class RoundStartHandler {
 
         if(round > 3) {
             round--;
-            try {
-                rebuildArena();
-            } catch (IOException e) {
-                Bukkit.broadcastMessage(ChatColor.RED + "CANNOT BUILD ARENA: DATA FILE NOT FOUND");
-            }
+            rebuildArena();
             GameEndHandler gameEndHandler = new GameEndHandler(plugin);
             gameEndHandler.gameEndTimer();
         } else {
@@ -153,6 +160,7 @@ public class RoundStartHandler {
      * Rebuilds the arena from the file
      * @throws IOException
      */
+    /*
     public void rebuildArena() throws IOException {
         //get the arena.yml file
         File arenaFile = new File(Bukkit.getServer().getPluginManager().getPlugin("TNTRun").getDataFolder(),"arena.yml");
@@ -198,6 +206,37 @@ public class RoundStartHandler {
                 counter++;
             }
         }
+    }*/
+    public void rebuildArena() {
+        BukkitWorld weWorld = new BukkitWorld(plugin.getConfig().getLocation("pos1").getWorld());
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            Clipboard clipboard;
+            File file = new File(plugin.getDataFolder(), "arena.schem");
+            if (!file.exists()) {
+                plugin.getLogger().warning("Arena Schematic does not exist! Cannot build arena until it is saved.");
+                return;
+            }
+
+            ClipboardFormat format = ClipboardFormats.findByFile(file);
+            try (ClipboardReader reader = format.getReader(new FileInputStream(file))) {
+                clipboard = reader.read();
+
+                try (EditSession editSession = WorldEdit.getInstance().newEditSession(weWorld)) {
+                    Operation operation = new ClipboardHolder(clipboard)
+                            .createPaste(editSession)
+                            .to(clipboard.getOrigin())
+                            // configure here
+                            .build();
+                    Operations.complete(operation);
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            Bukkit.broadcastMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + "ARENA RESET COMPLETE");
+        });
     }
 
     /**
@@ -264,11 +303,7 @@ public class RoundStartHandler {
                     } else {
                         timerStatus = "Preparing";
                     }
-                    try {
-                        rebuildArena();
-                    } catch (IOException e) {
-                        Bukkit.broadcastMessage(ChatColor.RED + "CANNOT BUILD ARENA: DATA FILE NOT FOUND");
-                    }
+                    rebuildArena();
 
                     gameRunning = false;
                 },
