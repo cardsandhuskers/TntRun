@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import static io.github.cardsandhuskers.teams.Teams.handler;
 import static io.github.cardsandhuskers.tntrun.TNTRun.*;
 
 public class PlayerDeathHandler {
@@ -112,6 +113,11 @@ public class PlayerDeathHandler {
             if(p2 != null && handler.getPlayerTeam(p2) != null) {
                 handler.getPlayerTeam(p2).addTempPoints(p2, firstPoints * multiplier);
                 p2.sendMessage("You Won! [" + ChatColor.GOLD + "+" + ChatColor.RED + firstPoints * multiplier + ChatColor.RESET + "] points!");
+                try {
+                    saveWinner(p2);
+                } catch (IOException e) {
+                    plugin.getLogger().severe("ERROR SAVING WINNER!");
+                }
             }
             //player that died is 2nd place, give them 50 bonus points
             if(p != null && handler.getPlayerTeam(p) != null) {
@@ -152,4 +158,33 @@ public class PlayerDeathHandler {
 
         writer.close();
     }
+
+
+    private void saveWinner(Player winner) throws IOException {
+        FileWriter writer = new FileWriter("plugins/TNTRun/stats.csv", true);
+        FileReader reader = new FileReader("plugins/TNTRun/stats.csv");
+
+        String[] headers = {"Event", "Team", "Name"};
+
+        CSVFormat.Builder builder = CSVFormat.Builder.create();
+        builder.setHeader(headers);
+        CSVFormat format = builder.build();
+
+        CSVParser parser = new CSVParser(reader, format);
+
+        if(!parser.getRecords().isEmpty()) {
+            format = CSVFormat.DEFAULT;
+        }
+
+        CSVPrinter printer = new CSVPrinter(writer, format);
+
+        int eventNum;
+        try {eventNum = Bukkit.getPluginManager().getPlugin("LobbyPlugin").getConfig().getInt("eventNum");} catch (Exception e) {eventNum = 1;}
+        if(winner != null && handler.getPlayerTeam(winner) != null) {
+            printer.printRecord(eventNum, handler.getPlayerTeam(winner).getTeamName(), winner.getDisplayName());
+        }
+
+        writer.close();
+    }
+
 }

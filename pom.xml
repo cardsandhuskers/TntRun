@@ -44,6 +44,14 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <outputDirectory>/Users/Mitchell/Desktop/minecraftServer/plugins</outputDirectory>
+                </configuration>
+            </plugin>
         </plugins>
         <resources>
             <resource>
@@ -76,7 +84,7 @@
             <dependency>
                 <groupId>com.intellectualsites.bom</groupId>
                 <artifactId>bom-1.18.x</artifactId>
-                <version>1.24</version>
+                <version>1.25</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>

@@ -2,25 +2,25 @@ name: TNTRun
 version: '${project.version}'
 main: io.github.cardsandhuskers.tntrun.TNTRun
 api-version: 1.19
-depend: [PlaceholderAPI, Teams, FastAsyncWorldEdit]
+depend: [ PlaceholderAPI, Teams ]
 authors: [ cardsanduskers ]
 description: tnt run
 commands:
-  saveTNTRunArena:
+  saveRunArena:
     description: save arena data so that it can be rebuilt
     command: /<command>
-  setTNTRunPos1:
+  setRunPos1:
     description: set corner 1 of arena
     command: /<command>
-  setTNTRunPos2:
+  setRunPos2:
     description: set corner 1 of arena
     command: /<command>
   startTNTRun:
     description: start the game
     command: /<command> [multiplier]
-  setTNTRunSpawn:
+  setRunSpawn:
     description: set spawnpoint
     command: /<command>
-  setTNTRunLobby:
+  setLobby:
     description: sets the location of the lobby
     command: /<command>

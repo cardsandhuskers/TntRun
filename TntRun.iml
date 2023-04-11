@@ -61,11 +61,11 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.lz4:lz4-java:1.8.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.zaxxer:SparseBitSet:1.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.anarres:parallelgzip:1.0.5" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.checkerframework:checker-qual:3.30.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.checkerframework:checker-qual:3.32.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: io.papermc:paperlib:1.0.8" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.bstats:bstats-bukkit:3.0.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.bstats:bstats-base:3.0.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.bstats:bstats-bukkit:3.0.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.bstats:bstats-base:3.0.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: dev.notmyfault.serverlib:ServerLib:2.3.1" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.intellectualsites.paster:Paster:1.1.4" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.intellectualsites.paster:Paster:1.1.5" level="project" />
   </component>
 </module>
