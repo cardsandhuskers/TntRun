@@ -6,6 +6,7 @@ import io.github.cardsandhuskers.tntrun.commands.*;
 import io.github.cardsandhuskers.tntrun.handlers.PlayerDeathHandler;
 
 import io.github.cardsandhuskers.tntrun.objects.Placeholder;
+import io.github.cardsandhuskers.tntrun.objects.StatCalculator;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -20,6 +21,7 @@ public final class TNTRun extends JavaPlugin {
     public static int timeVar = 0;
     public static String timerStatus = "Game Starting in";
     public static int remainingPlayers = 0;
+    public StatCalculator statCalculator;
 
 
     @Override
@@ -55,6 +57,16 @@ public final class TNTRun extends JavaPlugin {
         getCommand("setTNTRunSpawn").setExecutor(new SetSpawnPointCommand(this));
         getCommand("setTNTRunLobby").setExecutor(new SetLobbyCommand(this));
         getCommand("startTNTRun").setExecutor(new StartGameCommand(this));
+
+        statCalculator = new StatCalculator(this);
+        try {
+            statCalculator.calculateStats();
+        } catch (Exception e) {
+            StackTraceElement[] trace = e.getStackTrace();
+            String str = "";
+            for(StackTraceElement element:trace) str += element.toString() + "\n";
+            this.getLogger().severe("ERROR Calculating Stats!\n" + str);
+        }
     }
 
     @Override

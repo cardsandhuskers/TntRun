@@ -2,9 +2,15 @@ package io.github.cardsandhuskers.tntrun.handlers;
 
 import io.github.cardsandhuskers.teams.objects.Team;
 import io.github.cardsandhuskers.tntrun.TNTRun;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -69,7 +75,7 @@ public class PlayerDeathHandler {
     }
     public void updatePoints(Player p) {
         if(handler.getPlayerTeam(p) != null && playersList.size() > 0) {
-            int points = plugin.getConfig().getInt("survivalPoints");
+            double points = plugin.getConfig().getDouble("survivalPoints");
             for (OfflinePlayer player : playersList) {
                 if(player.getPlayer() == null || player.getPlayer().equals(p)) continue;
                 if (handler.getPlayerTeam(player.getPlayer()) != null) {
@@ -112,6 +118,38 @@ public class PlayerDeathHandler {
                 handler.getPlayerTeam(p).addTempPoints(p, secondPoints * multiplier);
                 p.sendMessage("You Died! You came in " + ChatColor.RED + (playersList.size() + 1) + "nd" + ChatColor.RESET + " Place [" + ChatColor.GOLD + "+" + ChatColor.RED + secondPoints * multiplier + ChatColor.RESET + "] points!");
             }
+            try {
+                saveWinner(p2);
+            } catch (IOException e) {
+                plugin.getLogger().severe("ERROR SAVING WINNER!");
+            }
         }
+
+    }
+    private void saveWinner(Player winner) throws IOException {
+        FileWriter writer = new FileWriter("plugins/TNTRun/stats.csv", true);
+        FileReader reader = new FileReader("plugins/TNTRun/stats.csv");
+
+        String[] headers = {"Event", "Team", "Name"};
+
+        CSVFormat.Builder builder = CSVFormat.Builder.create();
+        builder.setHeader(headers);
+        CSVFormat format = builder.build();
+
+        CSVParser parser = new CSVParser(reader, format);
+
+        if(!parser.getRecords().isEmpty()) {
+            format = CSVFormat.DEFAULT;
+        }
+
+        CSVPrinter printer = new CSVPrinter(writer, format);
+
+        int eventNum;
+        try {eventNum = Bukkit.getPluginManager().getPlugin("LobbyPlugin").getConfig().getInt("eventNum");} catch (Exception e) {eventNum = 1;}
+        if(winner != null && handler.getPlayerTeam(winner) != null) {
+            printer.printRecord(eventNum, handler.getPlayerTeam(winner).getTeamName(), winner.getDisplayName());
+        }
+
+        writer.close();
     }
 }

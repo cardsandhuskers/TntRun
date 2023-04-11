@@ -64,6 +64,27 @@ public class StartGameCommand implements CommandExecutor {
             } else {
                 p.sendMessage("Spawn Point not Set");
             }
+        } else if(sender instanceof Player p) {
+        } else {
+            if (plugin.getConfig().getLocation("spawnPoint") != null) {
+                if(args.length > 0) {
+                    if (args[0] != null) {
+                        //run if at least 1 arg and it's not null
+                        try {
+                            TNTRun.multiplier = Double.parseDouble(args[0]);
+                            startGame();
+
+                        } catch (Exception e) {
+                            System.out.println(ChatColor.RED + "ERROR: Argument must be an integer");
+                        }
+                    }
+                } else {
+                    //run if no arguments
+                    startGame();
+                }
+            } else {
+                System.out.println("Spawn Point not Set");
+            }
         }
         return false;
     }
@@ -88,7 +109,7 @@ public class StartGameCommand implements CommandExecutor {
                         Inventory inv = p.getInventory();
                         inv.clear();
                         if(handler.getPlayerTeam(p) == null) {
-                            p.setGameMode(GameMode.SPECTATOR);
+                            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, ()->{p.setGameMode(GameMode.SPECTATOR);},2L);
                         }
                     }
 
@@ -122,10 +143,10 @@ public class StartGameCommand implements CommandExecutor {
                     if(t.getSecondsLeft() == t.getTotalSeconds() - 11) {
                         Bukkit.broadcastMessage(ChatColor.STRIKETHROUGH + "----------------------------------------");
                         Bukkit.broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "How is the game Scored:");
-                        Bukkit.broadcastMessage("For winning: " + ChatColor.GOLD + (int)(plugin.getConfig().getInt("1stPlace") * multiplier) + ChatColor.RESET + " points" +
-                                                "\nFor 2nd Place: " + ChatColor.GOLD + (int)(plugin.getConfig().getInt("2ndPlace") * multiplier) + ChatColor.RESET + " points" +
+                        Bukkit.broadcastMessage("For winning: " + ChatColor.GOLD + (plugin.getConfig().getInt("1stPlace") * multiplier) + ChatColor.RESET + " points" +
+                                                "\nFor 2nd Place: " + ChatColor.GOLD + (plugin.getConfig().getInt("2ndPlace") * multiplier) + ChatColor.RESET + " points" +
                                                 "\nFor 3rd Place: " + ChatColor.GOLD + (int)(plugin.getConfig().getInt("3rdPlace") * multiplier) + ChatColor.RESET + " points" +
-                                                "\nFor each player you outlive: " + ChatColor.GOLD + (int)(plugin.getConfig().getInt("survivalPoints") * multiplier) + ChatColor.RESET + " points");
+                                                "\nFor each player you outlive: " + ChatColor.GOLD + (plugin.getConfig().getDouble("survivalPoints") * multiplier) + ChatColor.RESET + " points");
                         Bukkit.broadcastMessage(ChatColor.STRIKETHROUGH + "----------------------------------------");
                     }
                     if(t.getSecondsLeft() == t.getTotalSeconds() - 5) {
