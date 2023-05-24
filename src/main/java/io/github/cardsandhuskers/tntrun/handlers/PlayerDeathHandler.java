@@ -132,32 +132,6 @@ public class PlayerDeathHandler {
         }
 
     }
-    private void saveWinner(Player winner) throws IOException {
-        FileWriter writer = new FileWriter("plugins/TNTRun/stats.csv", true);
-        FileReader reader = new FileReader("plugins/TNTRun/stats.csv");
-
-        String[] headers = {"Event", "Team", "Name"};
-
-        CSVFormat.Builder builder = CSVFormat.Builder.create();
-        builder.setHeader(headers);
-        CSVFormat format = builder.build();
-
-        CSVParser parser = new CSVParser(reader, format);
-
-        if(!parser.getRecords().isEmpty()) {
-            format = CSVFormat.DEFAULT;
-        }
-
-        CSVPrinter printer = new CSVPrinter(writer, format);
-
-        int eventNum;
-        try {eventNum = Bukkit.getPluginManager().getPlugin("LobbyPlugin").getConfig().getInt("eventNum");} catch (Exception e) {eventNum = 1;}
-        if(winner != null && handler.getPlayerTeam(winner) != null) {
-            printer.printRecord(eventNum, handler.getPlayerTeam(winner).getTeamName(), winner.getDisplayName());
-        }
-
-        writer.close();
-    }
 
 
     private void saveWinner(Player winner) throws IOException {

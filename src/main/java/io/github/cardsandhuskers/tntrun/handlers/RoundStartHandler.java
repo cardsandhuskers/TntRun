@@ -160,53 +160,6 @@ public class RoundStartHandler {
      * Rebuilds the arena from the file
      * @throws IOException
      */
-    /*
-    public void rebuildArena() throws IOException {
-        //get the arena.yml file
-        File arenaFile = new File(Bukkit.getServer().getPluginManager().getPlugin("TNTRun").getDataFolder(),"arena.yml");
-        if(!arenaFile.exists()) {
-            //if the file does not exist, crash program, since game cannot run without it
-            throw new IOException("FILE CANNOT BE FOUND");
-        }
-        FileConfiguration arenaFileConfig = YamlConfiguration.loadConfiguration(arenaFile);
-
-        //make sure section exists
-        if (Objects.requireNonNull(arenaFileConfig.getConfigurationSection("blocks")).getKeys(false) != null
-                || !arenaFileConfig.getConfigurationSection("blocks").getKeys(false).isEmpty()) {
-
-            //LinkedHashMap<Block, String> blockMap = new LinkedHashMap<>();
-            //int numX = 0;
-            //int tempX = -1000;
-
-            //for each part of the arenaConfig
-            int counter = 1;
-            for (String s : arenaFileConfig.getConfigurationSection("blocks").getKeys(false)) {
-                Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, () -> {
-
-                    ConfigurationSection t = arenaFileConfig.getConfigurationSection("blocks." + s);
-
-                    //build location from data and get its block
-                    Location loc = new Location(Bukkit.getWorld(arenaFileConfig.get("world").toString()),
-                            t.getDouble("x"), t.getDouble("y"), t.getDouble("z"));
-                    Block b = loc.getBlock();
-
-                    //blockMap.put(b, t.get("Block").toString());
-                    switch(t.get("Block").toString()) {
-                        case "TNT":
-                            b.setType(Material.TNT);
-                            break;
-                        case "SAND":
-                            b.setType(Material.SAND);
-                            break;
-                        case "GRAVEL":
-                            b.setType(Material.GRAVEL);
-                            break;
-                    }
-                }, 1L * (counter/200) + 1);
-                counter++;
-            }
-        }
-    }*/
     public void rebuildArena() {
         BukkitWorld weWorld = new BukkitWorld(plugin.getConfig().getLocation("pos1").getWorld());
 
@@ -323,11 +276,15 @@ public class RoundStartHandler {
 
     }
 
+    /**
+     * Teleports all players to the arena spawn point
+     */
     private void teleportPlayers() {
         for (Team t: handler.getTeams()) {
             for(Player p :t.getOnlinePlayers()) {
                 p.teleport(plugin.getConfig().getLocation("spawnPoint"));
                 p.setGameMode(GameMode.ADVENTURE);
+                p.setSwimming(false);
                 Inventory inv = p.getInventory();
                 inv.clear();
                 numPlayers++;

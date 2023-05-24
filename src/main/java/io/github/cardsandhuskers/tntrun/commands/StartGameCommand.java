@@ -161,9 +161,7 @@ public class StartGameCommand implements CommandExecutor {
     }
 
     public void gameStartOperations() {
-
-
-
+        
         getServer().getPluginManager().registerEvents(new PlayerMoveListener(plugin, deathHandler, roundStartHandler, timeSinceLastMovementHandler), plugin);
         roundStartHandler.startRound();
 
