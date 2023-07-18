@@ -3,6 +3,7 @@ version: '${project.version}'
 main: io.github.cardsandhuskers.tntrun.TNTRun
 api-version: 1.19
 depend: [ PlaceholderAPI, Teams ]
+softdepend: [Multiverse-Core]
 authors: [ cardsanduskers ]
 description: tnt run
 commands:
