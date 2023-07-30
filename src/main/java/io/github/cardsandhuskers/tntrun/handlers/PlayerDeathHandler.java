@@ -12,7 +12,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.UUID;
 
 import static io.github.cardsandhuskers.teams.Teams.handler;
 import static io.github.cardsandhuskers.tntrun.TNTRun.*;
@@ -54,8 +53,20 @@ public class PlayerDeathHandler {
                 p.setGameMode(GameMode.SPECTATOR);
                 p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1,.5F);
 
+                int position = playersList.size() + 1;
+                String message;
+                if(position % 10 == 1) {
+                    message = position + "st";
+                } else if(position % 10 == 2) {
+                    message = position + "nd";
+                } else if(position % 10 == 3) {
+                    message = position + "rd";
+                } else {
+                    message = position + "th";
+                }
+
                 if(playersList.size() >= 3) {
-                    p.sendMessage("You Died! You came in " + ChatColor.RED + (playersList.size() + 1) + "th" + ChatColor.RESET + " Place");
+                    p.sendMessage("You Died! You came in " + ChatColor.BOLD + ChatColor.RED + message + ChatColor.RESET + " Place");
                 }
 
                 updatePoints(p);

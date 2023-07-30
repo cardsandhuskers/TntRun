@@ -9,8 +9,7 @@ import io.github.cardsandhuskers.tntrun.listeners.PlayerJoinListener;
 import io.github.cardsandhuskers.tntrun.listeners.PlayerMoveListener;
 import io.github.cardsandhuskers.tntrun.listeners.PlayerQuitListener;
 import io.github.cardsandhuskers.tntrun.objects.Countdown;
-import org.apache.commons.lang3.StringUtils;
-
+import io.github.cardsandhuskers.tntrun.objects.GameMessages;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -20,8 +19,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.io.IOException;
 
 import static io.github.cardsandhuskers.tntrun.TNTRun.*;
 import static io.github.cardsandhuskers.tntrun.handlers.RoundStartHandler.round;
@@ -131,24 +128,10 @@ public class StartGameCommand implements CommandExecutor {
                 //Each Second
                 (t) -> {
                     TNTRun.timeVar = t.getSecondsLeft();
-                    if(t.getSecondsLeft() == t.getTotalSeconds() - 1) {
-                        Bukkit.broadcastMessage(ChatColor.STRIKETHROUGH + "----------------------------------------");
-                        Bukkit.broadcastMessage(StringUtils.center(ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "TNT Run", 30));
-                        Bukkit.broadcastMessage(ChatColor.BLUE + "" + ChatColor.BOLD + "How To Play:");
-                        Bukkit.broadcastMessage("As you run, the blocks you stand on will fall." +
-                                "\nThere are 4 levels, fall through all 4 and you lose." +
-                                "\nLast person standing or anyone who survives to the end of the timer will be declared the winner.");
-                        Bukkit.broadcastMessage(ChatColor.STRIKETHROUGH + "----------------------------------------");
-                    }
-                    if(t.getSecondsLeft() == t.getTotalSeconds() - 11) {
-                        Bukkit.broadcastMessage(ChatColor.STRIKETHROUGH + "----------------------------------------");
-                        Bukkit.broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "How is the game Scored:");
-                        Bukkit.broadcastMessage("For winning: " + ChatColor.GOLD + (plugin.getConfig().getInt("1stPlace") * multiplier) + ChatColor.RESET + " points" +
-                                                "\nFor 2nd Place: " + ChatColor.GOLD + (plugin.getConfig().getInt("2ndPlace") * multiplier) + ChatColor.RESET + " points" +
-                                                "\nFor 3rd Place: " + ChatColor.GOLD + (int)(plugin.getConfig().getInt("3rdPlace") * multiplier) + ChatColor.RESET + " points" +
-                                                "\nFor each player you outlive: " + ChatColor.GOLD + (plugin.getConfig().getDouble("survivalPoints") * multiplier) + ChatColor.RESET + " points");
-                        Bukkit.broadcastMessage(ChatColor.STRIKETHROUGH + "----------------------------------------");
-                    }
+
+                    if(t.getSecondsLeft() == t.getTotalSeconds() - 2) Bukkit.broadcastMessage(GameMessages.getGameDescription());
+                    if(t.getSecondsLeft() == t.getTotalSeconds() - 12) Bukkit.broadcastMessage(GameMessages.getPointsDescription(plugin));
+
                     if(t.getSecondsLeft() == t.getTotalSeconds() - 5) {
                         roundStartHandler.rebuildArena();
                     }

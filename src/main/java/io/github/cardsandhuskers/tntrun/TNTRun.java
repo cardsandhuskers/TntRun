@@ -4,7 +4,6 @@ import io.github.cardsandhuskers.teams.Teams;
 import io.github.cardsandhuskers.teams.handlers.TeamHandler;
 import io.github.cardsandhuskers.tntrun.commands.*;
 import io.github.cardsandhuskers.tntrun.handlers.PlayerDeathHandler;
-
 import io.github.cardsandhuskers.tntrun.objects.Placeholder;
 import io.github.cardsandhuskers.tntrun.objects.StatCalculator;
 import org.bukkit.Bukkit;

@@ -1,18 +1,13 @@
 package io.github.cardsandhuskers.tntrun.handlers;
 
 import io.github.cardsandhuskers.teams.objects.Team;
-import io.github.cardsandhuskers.tntrun.TNTRun;
-import io.github.cardsandhuskers.tntrun.objects.Countdown;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitScheduler;
 
 import java.util.HashMap;
-import java.util.function.Consumer;
 
 import static io.github.cardsandhuskers.tntrun.TNTRun.handler;
-import static org.bukkit.Bukkit.getServer;
 
 public class TimeSinceLastMovementHandler implements Runnable {
 

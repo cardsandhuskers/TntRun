@@ -1,21 +1,9 @@
 package io.github.cardsandhuskers.tntrun;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import org.bukkit.Location;
+
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.block.data.type.TNT;
-import org.bukkit.util.io.BukkitObjectInputStream;
-import org.bukkit.util.io.BukkitObjectOutputStream;
 
 /**
  * IDK wtf this even is or why it's here, I don't even think I wrote this, gonna keep it around for now, but it does absolutely nothing

@@ -15,10 +15,6 @@ import io.github.cardsandhuskers.tntrun.TNTRun;
 import io.github.cardsandhuskers.tntrun.objects.Countdown;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
-import org.bukkit.block.Block;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -29,8 +25,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Objects;
 
 import static io.github.cardsandhuskers.tntrun.TNTRun.*;
 
