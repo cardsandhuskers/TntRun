@@ -19,6 +19,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import static io.github.cardsandhuskers.tntrun.TNTRun.*;
 import static io.github.cardsandhuskers.tntrun.handlers.RoundStartHandler.round;
@@ -108,6 +110,7 @@ public class StartGameCommand implements CommandExecutor {
                         if(handler.getPlayerTeam(p) == null) {
                             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, ()->{p.setGameMode(GameMode.SPECTATOR);},2L);
                         }
+                        p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 18000, 1));
                     }
 
 

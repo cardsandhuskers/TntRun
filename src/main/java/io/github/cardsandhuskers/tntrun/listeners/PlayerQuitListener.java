@@ -7,6 +7,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import static io.github.cardsandhuskers.tntrun.TNTRun.handler;
+import static io.github.cardsandhuskers.tntrun.TNTRun.timerStatus;
 
 public class PlayerQuitListener implements Listener {
     PlayerDeathHandler deathHandler;
@@ -19,6 +20,10 @@ public class PlayerQuitListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent e) {
         Player p = e.getPlayer();
         if(handler.getPlayerTeam(p) == null) return;
-        deathHandler.removePlayer(p);
+        if(timerStatus.equals("Round Ends in")) {
+            deathHandler.deathEvent(p);
+        } else {
+            deathHandler.removePlayer(p);
+        }
     }
 }
