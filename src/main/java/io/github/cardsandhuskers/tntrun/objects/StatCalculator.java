@@ -47,6 +47,8 @@ public class StatCalculator {
         }
 
         for(CSVRecord r:recordList) {
+            if (r.getRecordNumber() == 1) continue;
+
             String name = r.get(2);
             if(playerStatsMap.containsKey(name)) playerStatsMap.get(name).wins++;
             else playerStatsMap.put(name, new PlayerStatsHolder(name));

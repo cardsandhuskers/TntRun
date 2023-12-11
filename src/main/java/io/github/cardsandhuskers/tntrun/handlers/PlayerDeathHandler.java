@@ -135,11 +135,6 @@ public class PlayerDeathHandler {
                 handler.getPlayerTeam(p).addTempPoints(p, secondPoints * multiplier);
                 p.sendMessage("You Died! You came in " + ChatColor.RED + (playersList.size() + 1) + "nd" + ChatColor.RESET + " Place [" + ChatColor.GOLD + "+" + ChatColor.RED + secondPoints * multiplier + ChatColor.RESET + "] points!");
             }
-            try {
-                saveWinner(p2);
-            } catch (IOException e) {
-                plugin.getLogger().severe("ERROR SAVING WINNER!");
-            }
         }
 
     }
