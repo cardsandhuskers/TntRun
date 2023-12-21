@@ -177,6 +177,9 @@ public class PlayerMoveListener implements Listener {
                 }
             }
         }
+        if(p.getGameMode() == GameMode.SPECTATOR && p.getLocation().getY() < 0) {
+            p.teleport(plugin.getConfig().getLocation("spawnPoint"));
+        }
     }
     public void jump(Location initialLoc) {
         if(initialLoc.getBlock().getType().equals(Material.SAND) || initialLoc.getBlock().getType().equals(Material.GRAVEL)) {

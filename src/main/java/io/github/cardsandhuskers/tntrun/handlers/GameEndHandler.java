@@ -9,44 +9,23 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import static io.github.cardsandhuskers.tntrun.TNTRun.timerStatus;
+import static io.github.cardsandhuskers.tntrun.TNTRun.gameState;
 
 public class GameEndHandler {
     private TNTRun plugin;
     public GameEndHandler(TNTRun plugin) {
         this.plugin = plugin;
     }
-    public void endGame() {
-        HandlerList.unregisterAll(plugin);
-        Location l = plugin.getConfig().getLocation("lobby");
-        for(Player p:Bukkit.getOnlinePlayers()) {
-            p.teleport(l);
-        }
-        for(Player p:Bukkit.getOnlinePlayers()) {
-            if(p.isOp()) {
-                p.performCommand("startRound");
-                break;
-            }
-        }
-        try {
-            plugin.statCalculator.calculateStats();
-        } catch (Exception e) {
-            StackTraceElement[] trace = e.getStackTrace();
-            String str = "";
-            for(StackTraceElement element:trace) str += element.toString() + "\n";
-            plugin.getLogger().severe("ERROR Calculating Stats!\n" + str);
-        }
 
-        //Bukkit.broadcastMessage("Game is over");
-    }
-
-
+    /**
+     * Timer that runs at the end of the game to trigger everything required to end the game
+     */
     public void gameEndTimer() {
         Countdown timer = new Countdown((JavaPlugin)plugin,
                 plugin.getConfig().getInt("GameEndTime"),
                 //Timer Start
                 () -> {
-                    timerStatus = "Return to Lobby in";
+                    gameState = TNTRun.GameState.GAME_OVER;
                 },
 
                 //Timer End
@@ -69,5 +48,32 @@ public class GameEndHandler {
 
         // Start scheduling, don't use the "run" method unless you want to skip a second
         timer.scheduleTimer();
+    }
+
+    /**
+     * Runs at the very end of the game (after gameEndTimer runs)
+     */
+    public void endGame() {
+        HandlerList.unregisterAll(plugin);
+        Location l = plugin.getConfig().getLocation("lobby");
+        for(Player p:Bukkit.getOnlinePlayers()) {
+            p.teleport(l);
+        }
+        for(Player p:Bukkit.getOnlinePlayers()) {
+            if(p.isOp()) {
+                p.performCommand("startRound");
+                break;
+            }
+        }
+        try {
+            plugin.statCalculator.calculateStats();
+        } catch (Exception e) {
+            StackTraceElement[] trace = e.getStackTrace();
+            String str = "";
+            for(StackTraceElement element:trace) str += element.toString() + "\n";
+            plugin.getLogger().severe("ERROR Calculating Stats!\n" + str);
+        }
+
+        //Bukkit.broadcastMessage("Game is over");
     }
 }

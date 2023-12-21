@@ -7,6 +7,9 @@ GameEndTime: 20
 #points for outlasting another player
 survivalPoints: 20
 
+# number of double jumps to give per round
+doubleJumps: 3
+
 #top 3 points
 1stPlace: 75
 2ndPlace: 50

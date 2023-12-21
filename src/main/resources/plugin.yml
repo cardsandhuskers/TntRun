@@ -25,3 +25,9 @@ commands:
   setLobby:
     description: sets the location of the lobby
     command: /<command>
+  reloadTNTRun:
+    description: reloads the config
+    command: /<command>
+  cancelTNTRun:
+    description: cancels the game
+    command: /<command>

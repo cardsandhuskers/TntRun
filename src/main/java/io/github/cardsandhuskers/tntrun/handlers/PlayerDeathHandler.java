@@ -1,5 +1,6 @@
 package io.github.cardsandhuskers.tntrun.handlers;
 
+import io.github.cardsandhuskers.teams.handlers.TeamHandler;
 import io.github.cardsandhuskers.teams.objects.Team;
 import io.github.cardsandhuskers.tntrun.TNTRun;
 import org.apache.commons.csv.CSVFormat;
@@ -12,12 +13,17 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.UUID;
 
 import static io.github.cardsandhuskers.teams.Teams.handler;
 import static io.github.cardsandhuskers.tntrun.TNTRun.*;
+import static io.github.cardsandhuskers.tntrun.handlers.RoundStartHandler.round;
 
 public class PlayerDeathHandler {
     private ArrayList<OfflinePlayer> playersList;
+    private HashMap<UUID, Integer> playerPositions;
     private TNTRun plugin = (TNTRun) Bukkit.getPluginManager().getPlugin("TNTRun");
 
     public PlayerDeathHandler() {
@@ -33,6 +39,7 @@ public class PlayerDeathHandler {
                 playersList.add((OfflinePlayer) p);
             }
         }
+        playerPositions = new HashMap<>();
     }
 
     public void removePlayer(OfflinePlayer p) {
@@ -54,6 +61,8 @@ public class PlayerDeathHandler {
                 p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1,.5F);
 
                 int position = playersList.size() + 1;
+                playerPositions.put(p.getUniqueId(), position);
+
                 String message;
                 if(position % 10 == 1) {
                     message = position + "st";
@@ -82,6 +91,10 @@ public class PlayerDeathHandler {
         }
     }
 
+    /**
+     *
+     * @return list of alive players
+     */
     public ArrayList<OfflinePlayer> getPlayersList() {
         return playersList;
     }
@@ -119,7 +132,10 @@ public class PlayerDeathHandler {
         if(playersList.size() == 1) {
             int firstPoints = plugin.getConfig().getInt("1stPlace");
             int secondPoints = plugin.getConfig().getInt("2ndPlace");
+
             Player p2 = playersList.get(0).getPlayer();
+            playerPositions.put(p2.getUniqueId(), 1);
+
             //give 100 points to winner
             if(p2 != null && handler.getPlayerTeam(p2) != null) {
                 handler.getPlayerTeam(p2).addTempPoints(p2, firstPoints * multiplier);
@@ -139,12 +155,16 @@ public class PlayerDeathHandler {
 
     }
 
-
+    /**
+     * This saves winning player to csv, this needs to be rewritten, I want to save all positions
+     * @param winner - player that won the round
+     * @throws IOException
+     */
     private void saveWinner(Player winner) throws IOException {
         FileWriter writer = new FileWriter("plugins/TNTRun/stats.csv", true);
         FileReader reader = new FileReader("plugins/TNTRun/stats.csv");
 
-        String[] headers = {"Event", "Team", "Name"};
+        String[] headers = {"Event", "Team", "Name", "Round", "Position"};
 
         CSVFormat.Builder builder = CSVFormat.Builder.create();
         builder.setHeader(headers);
@@ -160,8 +180,16 @@ public class PlayerDeathHandler {
 
         int eventNum;
         try {eventNum = Bukkit.getPluginManager().getPlugin("LobbyPlugin").getConfig().getInt("eventNum");} catch (Exception e) {eventNum = 1;}
-        if(winner != null && handler.getPlayerTeam(winner) != null) {
+        /*if(winner != null && handler.getPlayerTeam(winner) != null) {
             printer.printRecord(eventNum, handler.getPlayerTeam(winner).getTeamName(), winner.getDisplayName());
+        }*/
+        for(UUID u:playerPositions.keySet()) {
+            try {
+                Player p = Objects.requireNonNull(Bukkit.getPlayer(u));
+                printer.printRecord(eventNum, TeamHandler.getInstance().getPlayerTeam(p).getTeamName(), p.getDisplayName(), round, playerPositions.get(u));
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
         }
 
         writer.close();
