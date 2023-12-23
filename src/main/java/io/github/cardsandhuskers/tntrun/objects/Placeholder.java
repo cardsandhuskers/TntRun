@@ -45,7 +45,13 @@ public class Placeholder extends PlaceholderExpansion {
             return mins + ":" + seconds;
         }
         if(s.equalsIgnoreCase("timerstage")) {
-            return timerStatus;
+            switch (gameState) {
+                case GAME_STARTING: return "Game Starts in";
+                case ROUND_STARTING: return "Round Starts in";
+                case ROUND_ACTIVE: return "Round Ends in";
+                case ROUND_OVER: return "Preparing";
+                case GAME_OVER: return "Return to Lobby";
+            }
         }
         if(s.equalsIgnoreCase("round")) {
             if(round == 0) {

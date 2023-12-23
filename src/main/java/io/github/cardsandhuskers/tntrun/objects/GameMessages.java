@@ -1,5 +1,6 @@
 package io.github.cardsandhuskers.tntrun.objects;
 
+import io.github.cardsandhuskers.teams.handlers.TeamHandler;
 import io.github.cardsandhuskers.teams.objects.Team;
 import io.github.cardsandhuskers.teams.objects.TempPointsHolder;
 import io.github.cardsandhuskers.tntrun.TNTRun;
@@ -13,10 +14,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import static io.github.cardsandhuskers.teams.Teams.handler;
 import static io.github.cardsandhuskers.tntrun.TNTRun.multiplier;
 
 public class GameMessages {
+    private static TeamHandler handler = TeamHandler.getInstance();
 
     public static String getGameDescription() {
         return ChatColor.STRIKETHROUGH + "----------------------------------------" + ChatColor.RESET +
@@ -119,5 +120,13 @@ public class GameMessages {
         for(Player p: Bukkit.getOnlinePlayers()) {
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1);
         }
+    }
+
+    public static String announceWinner(String winner) {
+        return ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "------------------------------" + ChatColor.RESET + "\n" +
+                StringUtils.center(ChatColor.RED + "" + ChatColor.BOLD + "Round Over!", 30) + ChatColor.RESET + "\n" +
+                StringUtils.center(ChatColor.RED + "" + ChatColor.BOLD + "Winner:", 30) + ChatColor.RESET + "\n" +
+                StringUtils.center(winner, 30) + ChatColor.RESET + "\n" +
+                ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "------------------------------";
     }
 }

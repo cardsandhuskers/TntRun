@@ -16,6 +16,7 @@ import com.sk89q.worldedit.session.ClipboardHolder;
 import io.github.cardsandhuskers.teams.objects.Team;
 import io.github.cardsandhuskers.tntrun.TNTRun;
 import io.github.cardsandhuskers.tntrun.objects.Countdown;
+import io.github.cardsandhuskers.tntrun.objects.GameMessages;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -35,16 +36,18 @@ import static io.github.cardsandhuskers.tntrun.TNTRun.*;
 public class RoundStartHandler {
     private TNTRun plugin;
     public static int round = 0;
-    private Countdown gameTimer;
+    private Countdown pregameTimer, gameTimer, gameOverTimer;
     private PlayerDeathHandler deathHandler;
     private TimeSinceLastMovementHandler timeSinceLastMovementHandler;
+    private DoubleJumpHandler doubleJumpHandler;
     private Stats stats;
 
     private int numPlayers = 0;
-    public RoundStartHandler(TNTRun plugin, PlayerDeathHandler deathHandler, TimeSinceLastMovementHandler timeSinceLastMovementHandler, Stats stats) {
-        this.timeSinceLastMovementHandler = timeSinceLastMovementHandler;
+    public RoundStartHandler(TNTRun plugin, PlayerDeathHandler dh, TimeSinceLastMovementHandler tslmh, DoubleJumpHandler djh, Stats stats) {
+        timeSinceLastMovementHandler = tslmh;
         this.plugin = plugin;
-        this.deathHandler = deathHandler;
+        deathHandler = dh;
+        doubleJumpHandler = djh;
         this.stats = stats;
     }
 
@@ -62,25 +65,30 @@ public class RoundStartHandler {
             GameEndHandler gameEndHandler = new GameEndHandler(plugin,stats);
             gameEndHandler.gameEndTimer();
         } else {
-            pregameTimer();
+            preroundTimer();
             deathHandler.initList();
         }
     }
 
-    private void pregameTimer() {
-        Countdown timer = new Countdown((JavaPlugin)plugin,
+    /**
+     * Runs before the round starts, countdown time where players can run around before blocks start disappearing
+     */
+    private void preroundTimer() {
+        pregameTimer = new Countdown((JavaPlugin)plugin,
                 plugin.getConfig().getInt("PreRoundTime"),
                 //Timer Start
                 () -> {
                     teleportPlayers();
-                    timerStatus = "Round Starts in";
+                    gameState = GameState.ROUND_STARTING;
                     remainingPlayers = 0;
                     for(Player p:Bukkit.getOnlinePlayers()) {
                         if(handler.getPlayerTeam(p) != null) {
                             remainingPlayers ++;
+                            p.getInventory().clear();
+                            doubleJumpHandler.giveItems(p);
+                            p.setAllowFlight(false);
                         }
                     }
-
                 },
 
                 //Timer End
@@ -109,15 +117,18 @@ public class RoundStartHandler {
         );
 
         // Start scheduling, don't use the "run" method unless you want to skip a second
-        timer.scheduleTimer();
+        pregameTimer.scheduleTimer();
     }
 
+    /**
+     * Timer that runs during the game, just a countdown until round should be forced to end
+     */
     private void gameTimer() {
         gameTimer = new Countdown((JavaPlugin)plugin,
                 plugin.getConfig().getInt("RoundTime"),
                 //Timer Start
                 () -> {
-                    timerStatus = "Round Ends in";
+                    gameState = GameState.ROUND_ACTIVE;
                     for(Team t: handler.getTeams()) {
                         for(Player p:t.getOnlinePlayers()) {
                             if(p.getGameMode() != GameMode.ADVENTURE) {
@@ -125,15 +136,16 @@ public class RoundStartHandler {
                             }
                             p.setGameMode(GameMode.ADVENTURE);
                             p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 18000, 1));
+                            p.setAllowFlight(true);
+                            doubleJumpHandler.initializeJumps(p);
                         }
                     }
                     for(Player p:Bukkit.getOnlinePlayers()) {
                         if(handler.getPlayerTeam(p) == null) {
                             p.setGameMode(GameMode.SPECTATOR);
                         }
-                        Inventory inv = p.getInventory();
-                        inv.clear();
                     }
+                    doubleJumpHandler.startOperation();
 
                 },
 
@@ -197,6 +209,9 @@ public class RoundStartHandler {
     public void reset() {
         gameTimer.cancelTimer();
         timeSinceLastMovementHandler.cancelOperation();
+        doubleJumpHandler.cancelOperation();
+        doubleJumpHandler.resetDoubleJumps();
+
         ArrayList<OfflinePlayer> players = deathHandler.getPlayersList();
         if(players.size() > 1) {
             int points;
@@ -238,22 +253,18 @@ public class RoundStartHandler {
             p.sendTitle(ChatColor.GREEN + "Round Over!", str, 5, 30, 5);
             p.setGameMode(GameMode.SPECTATOR);
         }
-        Bukkit.broadcastMessage(ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "------------------------------");
-        Bukkit.broadcastMessage(StringUtils.center(ChatColor.RED + "" + ChatColor.BOLD + "Round Over!", 30));
-        Bukkit.broadcastMessage(StringUtils.center(ChatColor.RED + "" + ChatColor.BOLD + "Winner(s):", 30));
-        Bukkit.broadcastMessage(StringUtils.center(str2, 30));
-        Bukkit.broadcastMessage(ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "------------------------------");
+        GameMessages.announceWinner(str2);
 
 
-        Countdown timer = new Countdown((JavaPlugin)plugin,
+        gameOverTimer = new Countdown((JavaPlugin)plugin,
                 plugin.getConfig().getInt("PostRoundTime"),
                 //Timer Start
                 () -> {
                     if(round == 3) {
-                        timerStatus = "Game Over";
+                        gameState = GameState.GAME_OVER;
 
                     } else {
-                        timerStatus = "Preparing";
+                        gameState = GameState.ROUND_OVER;
                     }
                     rebuildArena();
 
@@ -271,7 +282,7 @@ public class RoundStartHandler {
                     TNTRun.timeVar = t.getSecondsLeft();
                 }
         );
-        timer.scheduleTimer();
+        gameOverTimer.scheduleTimer();
 
     }
 
@@ -289,6 +300,18 @@ public class RoundStartHandler {
                 numPlayers++;
                 p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 18000, 1));
             }
+        }
+    }
+
+    public void cancelGame() {
+        if(pregameTimer != null) {
+            pregameTimer.cancelTimer();
+        }
+        if(gameTimer != null) {
+            gameTimer.cancelTimer();
+        }
+        if(gameOverTimer != null) {
+            gameOverTimer.cancelTimer();
         }
     }
 

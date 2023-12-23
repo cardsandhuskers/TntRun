@@ -3,9 +3,11 @@ package io.github.cardsandhuskers.tntrun.commands;
 import io.github.cardsandhuskers.teams.objects.Team;
 import io.github.cardsandhuskers.tntrun.objects.Stats;
 import io.github.cardsandhuskers.tntrun.TNTRun;
+import io.github.cardsandhuskers.tntrun.handlers.DoubleJumpHandler;
 import io.github.cardsandhuskers.tntrun.handlers.PlayerDeathHandler;
 import io.github.cardsandhuskers.tntrun.handlers.RoundStartHandler;
 import io.github.cardsandhuskers.tntrun.handlers.TimeSinceLastMovementHandler;
+import io.github.cardsandhuskers.tntrun.listeners.PlayerFlyListener;
 import io.github.cardsandhuskers.tntrun.listeners.PlayerJoinListener;
 import io.github.cardsandhuskers.tntrun.listeners.PlayerMoveListener;
 import io.github.cardsandhuskers.tntrun.listeners.PlayerQuitListener;
@@ -36,14 +38,24 @@ public class StartGameCommand implements CommandExecutor {
     private PlayerDeathHandler deathHandler;
     private TimeSinceLastMovementHandler timeSinceLastMovementHandler;
     private Stats stats;
+    private Countdown pregameTimer;
 
     public StartGameCommand(TNTRun plugin) {
         this.plugin = plugin;
         this.stats = new Stats("Round,Player,Team,Place");
     }
 
+    /**
+     * Command for starting the game
+     * @param sender
+     * @param command
+     * @param label
+     * @param args
+     * @return
+     */
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+
         if (sender instanceof Player p && p.isOp()) {
             if (plugin.getConfig().getLocation("spawnPoint") != null) {
                 if(args.length > 0) {
@@ -61,8 +73,6 @@ public class StartGameCommand implements CommandExecutor {
                     //run if no arguments
                     startGame();
                 }
-
-
 
             } else {
                 p.sendMessage("Spawn Point not Set");
@@ -92,13 +102,16 @@ public class StartGameCommand implements CommandExecutor {
         return false;
     }
 
+    /**
+     * Handles initial game starting logic, includes pregame countdown
+     */
     public void startGame() {
         round = 0;
-        Countdown timer = new Countdown((JavaPlugin)plugin,
+        pregameTimer = new Countdown((JavaPlugin)plugin,
                 plugin.getConfig().getInt("PregameTime"),
                 //Timer Start
                 () -> {
-                    timerStatus = "Game Starts in";
+                    gameState = GameState.GAME_STARTING;
                     remainingPlayers = 0;
                     for(Team t:handler.getTeams()) {
                         t.resetTempPoints();
@@ -117,18 +130,22 @@ public class StartGameCommand implements CommandExecutor {
                         p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 18000, 1));
                     }
 
-
                     timeSinceLastMovementHandler = new TimeSinceLastMovementHandler(plugin);
                     deathHandler = new PlayerDeathHandler(stats);
-                    roundStartHandler = new RoundStartHandler(plugin, deathHandler, timeSinceLastMovementHandler,stats);
+                    DoubleJumpHandler doubleJumpHandler = new DoubleJumpHandler(plugin);
+                    roundStartHandler = new RoundStartHandler(plugin, deathHandler, timeSinceLastMovementHandler, doubleJumpHandler,stats);
+
+
                     getServer().getPluginManager().registerEvents(new PlayerQuitListener(deathHandler), plugin);
+                    getServer().getPluginManager().registerEvents(new PlayerFlyListener(doubleJumpHandler), plugin);
                     getServer().getPluginManager().registerEvents(new PlayerJoinListener(plugin, timeSinceLastMovementHandler), plugin);
 
                 },
 
                 //Timer End
                 () -> {
-                    gameStartOperations();
+                    getServer().getPluginManager().registerEvents(new PlayerMoveListener(plugin, deathHandler, roundStartHandler, timeSinceLastMovementHandler), plugin);
+                    roundStartHandler.startRound();
 
                 },
 
@@ -147,14 +164,15 @@ public class StartGameCommand implements CommandExecutor {
         );
 
         // Start scheduling, don't use the "run" method unless you want to skip a second
-        timer.scheduleTimer();
+        pregameTimer.scheduleTimer();
     }
 
-    public void gameStartOperations() {
-        
-        getServer().getPluginManager().registerEvents(new PlayerMoveListener(plugin, deathHandler, roundStartHandler, timeSinceLastMovementHandler), plugin);
-        roundStartHandler.startRound();
-
+    /**
+     * cancels the game, calls roundHandler to cancel the timers
+     */
+    public void cancelGame() {
+        if(pregameTimer != null) pregameTimer.cancelTimer();
+        roundStartHandler.cancelGame();
     }
 
 }

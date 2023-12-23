@@ -4,6 +4,7 @@ import io.github.cardsandhuskers.teams.Teams;
 import io.github.cardsandhuskers.teams.handlers.TeamHandler;
 import io.github.cardsandhuskers.tntrun.commands.*;
 import io.github.cardsandhuskers.tntrun.handlers.PlayerDeathHandler;
+import io.github.cardsandhuskers.tntrun.listeners.PlayerFlyListener;
 import io.github.cardsandhuskers.tntrun.objects.Placeholder;
 import io.github.cardsandhuskers.tntrun.objects.StatCalculator;
 import org.bukkit.Bukkit;
@@ -18,13 +19,13 @@ public final class TNTRun extends JavaPlugin {
     //PlaceholderAPI values
     public static TeamHandler handler;
     public static int timeVar = 0;
-    public static String timerStatus = "Game Starting in";
+    public static GameState gameState;
     public static int remainingPlayers = 0;
     public StatCalculator statCalculator;
 
     @Override
     public void onEnable() {
-        handler = Teams.handler;
+        handler = TeamHandler.getInstance();
         //APIs
 
         //Placeholder API validation
@@ -54,7 +55,10 @@ public final class TNTRun extends JavaPlugin {
         getCommand("saveRunArena").setExecutor(new SaveArenaCommand(this));
         getCommand("setRunSpawn").setExecutor(new SetSpawnPointCommand(this));
         getCommand("setLobby").setExecutor(new SetLobbyCommand(this));
-        getCommand("startTNTRun").setExecutor(new StartGameCommand(this));
+        StartGameCommand startGameCommand = new StartGameCommand(this);
+        getCommand("startTNTRun").setExecutor(startGameCommand);
+        getCommand("reloadTNTRun").setExecutor(new ReloadConfigCommand(this));
+        getCommand("cancelTNTRun").setExecutor(new CancelGameCommand(this, startGameCommand));
 
         statCalculator = new StatCalculator(this);
         try {
@@ -65,10 +69,19 @@ public final class TNTRun extends JavaPlugin {
             for(StackTraceElement element:trace) str += element.toString() + "\n";
             this.getLogger().severe("ERROR Calculating Stats!\n" + str);
         }
+
     }
 
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+    }
+
+    public enum GameState {
+        GAME_STARTING,
+        ROUND_STARTING,
+        ROUND_ACTIVE,
+        ROUND_OVER,
+        GAME_OVER
     }
 }
