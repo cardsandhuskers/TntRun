@@ -22,7 +22,6 @@ public final class TNTRun extends JavaPlugin {
     public static int remainingPlayers = 0;
     public StatCalculator statCalculator;
 
-
     @Override
     public void onEnable() {
         handler = Teams.handler;

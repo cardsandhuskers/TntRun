@@ -3,6 +3,8 @@ package io.github.cardsandhuskers.tntrun.handlers;
 import io.github.cardsandhuskers.tntrun.TNTRun;
 import io.github.cardsandhuskers.tntrun.objects.Countdown;
 import io.github.cardsandhuskers.tntrun.objects.GameMessages;
+import io.github.cardsandhuskers.tntrun.objects.Stats;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -13,8 +15,10 @@ import static io.github.cardsandhuskers.tntrun.TNTRun.timerStatus;
 
 public class GameEndHandler {
     private TNTRun plugin;
-    public GameEndHandler(TNTRun plugin) {
+    private Stats stats;
+    public GameEndHandler(TNTRun plugin, Stats stats) {
         this.plugin = plugin;
+        this.stats = stats;
     }
     public void endGame() {
         HandlerList.unregisterAll(plugin);
@@ -47,11 +51,13 @@ public class GameEndHandler {
                 //Timer Start
                 () -> {
                     timerStatus = "Return to Lobby in";
+                    stats.writeToFile(plugin.getDataFolder().toPath().toString(), "tntRunStats");
                 },
 
                 //Timer End
                 () -> {
                     endGame();
+                    
                     //for(org.bukkit.scoreboard.Team t:Bukkit.getScoreboardManager().getMainScoreboard().getTeams()) {
                     //    t.setOption(org.bukkit.scoreboard.Team.Option.COLLISION_RULE, org.bukkit.scoreboard.Team.OptionStatus.ALWAYS);
                     //}

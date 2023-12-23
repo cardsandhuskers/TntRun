@@ -1,6 +1,7 @@
 package io.github.cardsandhuskers.tntrun.commands;
 
 import io.github.cardsandhuskers.teams.objects.Team;
+import io.github.cardsandhuskers.tntrun.objects.Stats;
 import io.github.cardsandhuskers.tntrun.TNTRun;
 import io.github.cardsandhuskers.tntrun.handlers.PlayerDeathHandler;
 import io.github.cardsandhuskers.tntrun.handlers.RoundStartHandler;
@@ -10,6 +11,7 @@ import io.github.cardsandhuskers.tntrun.listeners.PlayerMoveListener;
 import io.github.cardsandhuskers.tntrun.listeners.PlayerQuitListener;
 import io.github.cardsandhuskers.tntrun.objects.Countdown;
 import io.github.cardsandhuskers.tntrun.objects.GameMessages;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -33,9 +35,11 @@ public class StartGameCommand implements CommandExecutor {
     private RoundStartHandler roundStartHandler;
     private PlayerDeathHandler deathHandler;
     private TimeSinceLastMovementHandler timeSinceLastMovementHandler;
+    private Stats stats;
 
     public StartGameCommand(TNTRun plugin) {
         this.plugin = plugin;
+        this.stats = new Stats("Round,Player,Team,Place");
     }
 
     @Override
@@ -115,8 +119,8 @@ public class StartGameCommand implements CommandExecutor {
 
 
                     timeSinceLastMovementHandler = new TimeSinceLastMovementHandler(plugin);
-                    deathHandler = new PlayerDeathHandler();
-                    roundStartHandler = new RoundStartHandler(plugin, deathHandler, timeSinceLastMovementHandler);
+                    deathHandler = new PlayerDeathHandler(stats);
+                    roundStartHandler = new RoundStartHandler(plugin, deathHandler, timeSinceLastMovementHandler,stats);
                     getServer().getPluginManager().registerEvents(new PlayerQuitListener(deathHandler), plugin);
                     getServer().getPluginManager().registerEvents(new PlayerJoinListener(plugin, timeSinceLastMovementHandler), plugin);
 

@@ -1,5 +1,8 @@
 package io.github.cardsandhuskers.tntrun.handlers;
 
+import io.github.cardsandhuskers.tntrun.objects.Stats;
+
+
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
@@ -35,12 +38,14 @@ public class RoundStartHandler {
     private Countdown gameTimer;
     private PlayerDeathHandler deathHandler;
     private TimeSinceLastMovementHandler timeSinceLastMovementHandler;
+    private Stats stats;
 
     private int numPlayers = 0;
-    public RoundStartHandler(TNTRun plugin, PlayerDeathHandler deathHandler, TimeSinceLastMovementHandler timeSinceLastMovementHandler) {
+    public RoundStartHandler(TNTRun plugin, PlayerDeathHandler deathHandler, TimeSinceLastMovementHandler timeSinceLastMovementHandler, Stats stats) {
         this.timeSinceLastMovementHandler = timeSinceLastMovementHandler;
         this.plugin = plugin;
         this.deathHandler = deathHandler;
+        this.stats = stats;
     }
 
     /**
@@ -54,7 +59,7 @@ public class RoundStartHandler {
         if(round > 3) {
             round--;
             rebuildArena();
-            GameEndHandler gameEndHandler = new GameEndHandler(plugin);
+            GameEndHandler gameEndHandler = new GameEndHandler(plugin,stats);
             gameEndHandler.gameEndTimer();
         } else {
             pregameTimer();

@@ -1,7 +1,10 @@
 package io.github.cardsandhuskers.tntrun.handlers;
 
 import io.github.cardsandhuskers.teams.objects.Team;
+import io.github.cardsandhuskers.tntrun.objects.Stats;
 import io.github.cardsandhuskers.tntrun.TNTRun;
+import static io.github.cardsandhuskers.tntrun.handlers.RoundStartHandler.round;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -19,8 +22,10 @@ import static io.github.cardsandhuskers.tntrun.TNTRun.*;
 public class PlayerDeathHandler {
     private ArrayList<OfflinePlayer> playersList;
     private TNTRun plugin = (TNTRun) Bukkit.getPluginManager().getPlugin("TNTRun");
+    private Stats stats;
 
-    public PlayerDeathHandler() {
+    public PlayerDeathHandler(Stats stats) {
+        this.stats = stats;
     }
 
     /**
@@ -74,6 +79,11 @@ public class PlayerDeathHandler {
                 break;
             }
         }
+
+        //Round, Player, Team, Place
+        String listEntry = RoundStartHandler.round + "," + p.getName() + "," + handler.getPlayerTeam(p).getTeamName() + "," + (playersList.size()+1);
+        stats.addEntry(listEntry);
+
         remainingPlayers = playersList.size();
         if(playersList.size() <= 1 && gameRunning == true) {
             return true;
