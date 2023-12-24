@@ -72,7 +72,7 @@ public class Placeholder extends PlaceholderExpansion {
                 String color = "";
                 if (handler.getPlayerTeam(Bukkit.getPlayer(holder.name)) != null)
                     color = handler.getPlayerTeam(Bukkit.getPlayer(holder.name)).color;
-                return color + holder.name + ChatColor.RESET + ": " + holder.wins;
+                return color + holder.name + ChatColor.RESET + String.format(": %.1f", holder.getAveragePlacement());
             }
 
 

@@ -29,7 +29,9 @@ public class GameEndHandler {
                 plugin.getConfig().getInt("GameEndTime"),
                 //Timer Start
                 () -> {
-                    stats.writeToFile(plugin.getDataFolder().toPath().toString(), "tntRunStats");
+                    int eventNum;
+                    try {eventNum = Bukkit.getPluginManager().getPlugin("LobbyPlugin").getConfig().getInt("eventNum");} catch (Exception e) {eventNum = 1;}
+                    stats.writeToFile(plugin.getDataFolder().toPath().toString(), "tntRunStats" + eventNum);
                     gameState = TNTRun.GameState.GAME_OVER;
                 },
 
