@@ -253,7 +253,7 @@ public class RoundStartHandler {
             p.sendTitle(ChatColor.GREEN + "Round Over!", str, 5, 30, 5);
             p.setGameMode(GameMode.SPECTATOR);
         }
-        GameMessages.announceWinner(str2);
+        Bukkit.broadcastMessage(GameMessages.announceWinner(str2));
 
 
         gameOverTimer = new Countdown((JavaPlugin)plugin,

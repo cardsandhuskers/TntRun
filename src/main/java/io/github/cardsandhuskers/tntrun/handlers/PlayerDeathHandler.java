@@ -68,15 +68,17 @@ public class PlayerDeathHandler {
                 int position = playersList.size() + 1;
                 playerPositions.put(p.getUniqueId(), position);
 
-                String message;
-                if(position % 10 == 1) {
-                    message = position + "st";
+                String message = String.valueOf(position);
+                if(position == 11 || position == 12 || position == 13) {
+                    message += "th";
+                }else if(position % 10 == 1) {
+                    message +="st";
                 } else if(position % 10 == 2) {
-                    message = position + "nd";
+                    message += "nd";
                 } else if(position % 10 == 3) {
-                    message = position + "rd";
+                    message +="rd";
                 } else {
-                    message = position + "th";
+                    message +="th";
                 }
 
                 if(playersList.size() >= 3) {
@@ -109,6 +111,7 @@ public class PlayerDeathHandler {
         return playersList;
     }
     public void updatePoints(Player p) {
+        TeamHandler handler = TeamHandler.getInstance();
         if(handler.getPlayerTeam(p) != null && playersList.size() > 0) {
             double points = plugin.getConfig().getDouble("survivalPoints");
             for (OfflinePlayer player : playersList) {
@@ -146,8 +149,13 @@ public class PlayerDeathHandler {
             Player p2 = playersList.get(0).getPlayer();
             playerPositions.put(p2.getUniqueId(), 1);
 
-            //give 100 points to winner
+            //give points to winner
             if(p2 != null && handler.getPlayerTeam(p2) != null) {
+                //add winner to list
+                //Round, Player, Team, Place
+                String listEntry = RoundStartHandler.round + "," + p2.getName() + "," + handler.getPlayerTeam(p2).getTeamName() + "," + (1);
+                stats.addEntry(listEntry);
+
                 handler.getPlayerTeam(p2).addTempPoints(p2, firstPoints * multiplier);
                 p2.sendMessage("You Won! [" + ChatColor.GOLD + "+" + ChatColor.RED + firstPoints * multiplier + ChatColor.RESET + "] points!");
                 try {

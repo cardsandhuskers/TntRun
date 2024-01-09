@@ -74,14 +74,17 @@ public class Placeholder extends PlaceholderExpansion {
                     color = handler.getPlayerTeam(Bukkit.getPlayer(holder.name)).color;
                 return color + holder.name + ChatColor.RESET + String.format(": %.1f", holder.getAveragePlacement());
             }
-
-
         } catch (Exception e) {
             StackTraceElement[] trace = e.getStackTrace();
             String str = "";
             for(StackTraceElement element:trace) str += element.toString() + "\n";
             plugin.getLogger().warning("Error with Placeholder!\n");
         }
+        try {
+            if(values[0].equalsIgnoreCase("yourFinish")) {
+                return plugin.statCalculator.getPlayerFinishPosition(p);
+            }
+        } catch (Exception e) {e.printStackTrace();}
 
         return null;
     }

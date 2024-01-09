@@ -1,10 +1,14 @@
 package io.github.cardsandhuskers.tntrun.objects;
 
+import io.github.cardsandhuskers.teams.handlers.TeamHandler;
+import io.github.cardsandhuskers.teams.objects.Team;
 import io.github.cardsandhuskers.tntrun.TNTRun;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -17,52 +21,8 @@ public class StatCalculator {
         this.plugin = plugin;
     }
 
-    /*public void calculateStats() throws Exception{
-        HashMap<String, PlayerStatsHolder> playerStatsMap = new HashMap<>();
-
-        FileReader reader = null;
-        try {
-            reader = new FileReader(plugin.getDataFolder() + "/stats.csv");
-        } catch (IOException e) {
-            plugin.getLogger().warning("Stats file not found!");
-            return;
-        }
-        String[] headers = {"Event", "Team", "Name"};
-
-        CSVFormat.Builder builder = CSVFormat.Builder.create();
-        builder.setHeader(headers);
-        CSVFormat format = builder.build();
-
-        CSVParser parser;
-        try {
-            parser = new CSVParser(reader, format);
-        } catch (IOException e) {
-            throw new Exception(e);
-        }
-        List<CSVRecord> recordList = parser.getRecords();
-
-        try {
-            reader.close();
-        } catch (IOException e) {
-            throw new Exception(e);
-        }
-
-        for(CSVRecord r:recordList) {
-            if (r.getRecordNumber() == 1) continue;
-
-            String name = r.get(2);
-            if(playerStatsMap.containsKey(name)) playerStatsMap.get(name).wins++;
-            else playerStatsMap.put(name, new PlayerStatsHolder(name));
-        }
-        playerStatsHolders = new ArrayList<>(playerStatsMap.values());
-        Comparator playerStatsComparator = new PlayerStatsComparator();
-        playerStatsHolders.sort(playerStatsComparator);
-        Collections.reverse(playerStatsHolders);
-
-    }*/
-
     public void calculateStats() throws IOException{
-        int initialEvent = 2;
+        int initialEvent = 1;
         int eventNum;
         try {eventNum = Bukkit.getPluginManager().getPlugin("LobbyPlugin").getConfig().getInt("eventNum");}
         catch (Exception e) {eventNum = initialEvent;}
@@ -107,6 +67,28 @@ public class StatCalculator {
         playerStatsHolders = new ArrayList<>(playerStatsMap.values());
         playerStatsHolders.sort(new PlayerStatsComparator());
 
+    }
+
+    public String getPlayerFinishPosition(OfflinePlayer p) {
+        String name = p.getName();
+        ArrayList<PlayerStatsHolder> pph= new ArrayList<>(playerStatsHolders);
+
+        int i = 1;
+        PlayerStatsHolder playerHolder = null;
+        for(PlayerStatsHolder holder: pph) {
+            if(holder.name.equals(name)) {
+                playerHolder = holder;
+                break;
+            }
+            i++;
+        }
+        if(playerHolder == null || i <= 10) return "";
+
+        Team team = TeamHandler.getInstance().getPlayerTeam(p.getPlayer());
+        String color = "";
+        if(team != null) color = team.getColor();
+
+        return i + ". " + color + "You" + ChatColor.RESET + ": " + String.format("%.1f", playerHolder.getAveragePlacement());
     }
 
     public ArrayList<PlayerStatsHolder> getPlayerStatsHolders() {

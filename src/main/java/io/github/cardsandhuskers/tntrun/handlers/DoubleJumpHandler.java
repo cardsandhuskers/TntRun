@@ -127,6 +127,9 @@ public class DoubleJumpHandler implements Runnable{
             if(cooldown >= 39) {
                 cooldowns.remove(p);
                 if(remainingJumps.get(p.getUniqueId()) > 0) p.setAllowFlight(true);
+                run();
+                break;
+
             } else {
                 cooldowns.put(p, cooldown + 1);
             }
