@@ -1,16 +1,13 @@
 package io.github.cardsandhuskers.tntrun.commands;
 
 import io.github.cardsandhuskers.teams.objects.Team;
+import io.github.cardsandhuskers.tntrun.listeners.*;
 import io.github.cardsandhuskers.tntrun.objects.Stats;
 import io.github.cardsandhuskers.tntrun.TNTRun;
 import io.github.cardsandhuskers.tntrun.handlers.DoubleJumpHandler;
 import io.github.cardsandhuskers.tntrun.handlers.PlayerDeathHandler;
 import io.github.cardsandhuskers.tntrun.handlers.RoundStartHandler;
 import io.github.cardsandhuskers.tntrun.handlers.TimeSinceLastMovementHandler;
-import io.github.cardsandhuskers.tntrun.listeners.PlayerFlyListener;
-import io.github.cardsandhuskers.tntrun.listeners.PlayerJoinListener;
-import io.github.cardsandhuskers.tntrun.listeners.PlayerMoveListener;
-import io.github.cardsandhuskers.tntrun.listeners.PlayerQuitListener;
 import io.github.cardsandhuskers.tntrun.objects.Countdown;
 import io.github.cardsandhuskers.tntrun.objects.GameMessages;
 
@@ -138,6 +135,7 @@ public class StartGameCommand implements CommandExecutor {
 
                     getServer().getPluginManager().registerEvents(new PlayerQuitListener(deathHandler), plugin);
                     getServer().getPluginManager().registerEvents(new PlayerFlyListener(doubleJumpHandler), plugin);
+                    getServer().getPluginManager().registerEvents(new PlayerClickListener(doubleJumpHandler), plugin);
                     getServer().getPluginManager().registerEvents(new PlayerJoinListener(plugin, timeSinceLastMovementHandler), plugin);
 
                 },
