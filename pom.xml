@@ -6,7 +6,7 @@
 
     <groupId>io.github.cardsandhuskers</groupId>
     <artifactId>TNTRun</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>TNTRun</name>
@@ -22,10 +22,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.13.0</version>
                 <configuration>
-                    <source>16</source>
-                    <target>16</target>
+                    <source>21</source>
+                    <target>21</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -63,8 +63,8 @@
 
     <repositories>
         <repository>
-            <id>spigotmc-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+            <id>papermc-repo</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
         <repository>
             <id>sonatype</id>
@@ -77,6 +77,10 @@
         <repository>
             <id>enginehub-maven</id>
             <url>https://maven.enginehub.org/repo/</url>
+        </repository>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/cardsandhuskers/TeamsPlugin</url>
         </repository>
     </repositories>
     <dependencyManagement>
@@ -92,21 +96,21 @@
     </dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>1.20.1-R0.1-SNAPSHOT</version>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.21-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>me.clip</groupId>
             <artifactId>placeholderapi</artifactId>
-            <version>2.11.3</version>
+            <version>2.11.6</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.github.cardsandhuskers</groupId>
-            <artifactId>Teams</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <artifactId>teams</artifactId>
+            <version>1.1.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -134,6 +138,12 @@
                     <groupId>*</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-api</artifactId>
+            <version>4.18.0</version> <!-- Use the appropriate version -->
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

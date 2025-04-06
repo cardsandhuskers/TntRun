@@ -24,6 +24,7 @@ public class PlayerFlyListener implements Listener {
 
         if(e.isFlying()) {
             if(e.getPlayer().getGameMode() != GameMode.ADVENTURE) return;
+            System.out.println("IS FLYING");
             e.setCancelled(true);
             Player p = e.getPlayer();
 

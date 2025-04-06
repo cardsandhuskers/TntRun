@@ -66,15 +66,20 @@ public class DoubleJumpHandler implements Runnable{
             if(i == null) {
 
             } else if (i.getType() == Material.FEATHER) {
-                ItemStack feathers = new ItemStack(Material.FEATHER, remainingJumps.getOrDefault(p.getUniqueId(), 0));
-                //System.out.println(remainingJumps.getOrDefault(p.getUniqueId(), 0));
-                ItemMeta featherMeta = feathers.getItemMeta();
-                featherMeta.setLore(Collections.singletonList("Jump while in the air to use one of your double jumps!"));
-                featherMeta.setDisplayName("Double Jumps Remaining");
-                feathers.setItemMeta(featherMeta);
 
-                inv.setItem(index, feathers);
-                break;
+                if(remainingJumps.get(p.getUniqueId())  != null && remainingJumps.get(p.getUniqueId())  > 0) {
+                    ItemStack feathers = new ItemStack(Material.FEATHER, remainingJumps.getOrDefault(p.getUniqueId(), 0));
+                    //System.out.println(remainingJumps.getOrDefault(p.getUniqueId(), 0));
+                    ItemMeta featherMeta = feathers.getItemMeta();
+                    featherMeta.setLore(Collections.singletonList("Jump while in the air to use one of your double jumps!"));
+                    featherMeta.setDisplayName("Double Jumps Remaining");
+                    feathers.setItemMeta(featherMeta);
+
+                    inv.setItem(index, feathers);
+                    break;
+                } else {
+                    inv.setItem(index, new ItemStack(Material.AIR));
+                }
             }
             index++;
         }
@@ -90,11 +95,11 @@ public class DoubleJumpHandler implements Runnable{
         if(remainingJumps.containsKey(u)) {
             int jumps = remainingJumps.get(u);
             if(jumps > 0) {
-                remainingJumps.put(u, jumps-1);
                 if(cooldowns.containsKey(p)) {
                     return false;
                 } else {
                     cooldowns.put(p, 0);
+                    remainingJumps.put(u, jumps-1);
                     updateItems(p);
                     return true;
                 }
